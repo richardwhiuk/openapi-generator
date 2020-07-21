@@ -375,6 +375,22 @@ paths:
               schema:
                 $ref: "#/components/schemas/StringObject"
   /repos:
+    put:
+      operationId: SetRepo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            # This schema deliberately has no type
+            # to validate inline model resolution of
+            # undeclared objects with properties.
+            schema:
+              properties:
+                inline_string:
+                  type: string
+      responses:
+        '204':
+          description: Success
     post:
       tags: [Repo]
       operationId: CreateRepo
