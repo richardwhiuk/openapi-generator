@@ -178,7 +178,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UuidObject"
-  /required_octet_stream:
+  /required_octet_stream_binary:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              # This is ill-defined, but we should just treat
+              # binary bodies as opaque.
+              type: object
+      responses:
+        '200':
+          description: 'OK'
+    put:
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              # This is our expected representation of binary
+              # data
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: 'OK'
+  /required_octet_stream_byte:
     put:
       requestBody:
         required: true

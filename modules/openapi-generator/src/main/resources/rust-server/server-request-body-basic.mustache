@@ -24,18 +24,29 @@
                                     }
           {{/x-consumes-plain-text}}
           {{#x-consumes-plain-text}}
-            {{#isByteArray}}
+            {{#isBinary}}
                                     Some(swagger::ByteArray(body.to_vec()))
-            {{/isByteArray}}
-            {{#isString}}
+            {{/isBinary}}
+            {{^isBinary}}
                                     match String::from_utf8(body.to_vec()) {
+              {{#isString}}
                                         Ok(param_{{{paramName}}}) => Some(param_{{{paramName}}}),
+              {{/isString}}
+              {{#isByteArray}}
+                                        Ok(param_{{{paramName}}}) => match param_{{{paramName}}}.parse::<swagger::ByteArray>() {
+                                            Ok(param_{{{paramName}}}) => Some(param_{{{paramName}}}),
+                                            Err(e) => return Ok(Response::builder()
+                                                        .status(StatusCode::BAD_REQUEST)
+                                                        .body(Body::from(format!("Couldn't decode body parameter {{{baseName}}}: {}", e)))
+                                                        .expect("Unable to create Bad Request response for invalid body parameter {{{baseName}}} due to decode error")),
+                                        },
+              {{/isByteArray}}
                                         Err(e) => return Ok(Response::builder()
                                                         .status(StatusCode::BAD_REQUEST)
                                                         .body(Body::from(format!("Couldn't parse body parameter {{{baseName}}} - not valid UTF-8: {}", e)))
                                                         .expect("Unable to create Bad Request response for invalid body parameter {{{baseName}}} due to UTF-8")),
                                     }
-            {{/isString}}
+            {{/isBinary}}
           {{/x-consumes-plain-text}}
         {{/vendorExtensions}}
                                 } else {

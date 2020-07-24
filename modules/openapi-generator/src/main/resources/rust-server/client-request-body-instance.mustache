@@ -52,12 +52,15 @@
         // Body parameter
       {{#vendorExtensions}}
         {{#x-consumes-plain-text}}
-          {{#isByteArray}}
+          {{#isBinary}}
         let body = param_{{{paramName}}}.0;
+          {{/isBinary}}
+          {{#isByteArray}}
+        let body = param_{{{paramName}}}.to_string();
           {{/isByteArray}}
-          {{^isByteArray}}
+          {{#isString}}
         let body = param_{{{paramName}}};
-          {{/isByteArray}}
+          {{/isString}}
         {{/x-consumes-plain-text}}
         {{#x-consumes-xml}}
         let body = param_{{{paramName}}}.as_xml();

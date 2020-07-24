@@ -433,6 +433,10 @@ public class RustServerCodegen extends AbstractRustCodegen implements CodegenCon
         return "*/*".equals(mimetype);
     }
 
+    private boolean isMimetypeText(String mimetype) {
+        return mimetype.toLowerCase(Locale.ROOT).startsWith("text/");
+    }
+
     /**
      * Do we have any special handling for this mimetype?
      */
@@ -1024,13 +1028,43 @@ public class RustServerCodegen extends AbstractRustCodegen implements CodegenCon
                 ++i;
             }
 
-            if (StringUtils.isNotBlank(originalSchema.get$ref())) {
+            if (isMimetypePlain(codegenParameter.contentType)) {
+                // We don't have native support for this request body mime type
+                // so we need to encode it in a plain fashion
+
+                // Reset to defaults
+                codegenParameter.isString = false;
+                codegenParameter.isBinary = false;
+                codegenParameter.isByteArray = false;
+                codegenParameter.isPrimitiveType = true;
+                codegenParameter.isArray = false;
+
+                // Try and use the schema to work out how to decode this. If that
+                // fails, make a guess based on the content type.
+                if (ModelUtils.isByteArraySchema(originalSchema)) {
+                    codegenParameter.isByteArray = true;
+                    codegenParameter.dataType = bytesType;
+                } else if (ModelUtils.isBinarySchema(originalSchema)) {
+                    codegenParameter.isBinary = true;
+                    codegenParameter.dataType = bytesType;
+                } else if (ModelUtils.isStringSchema(originalSchema)) {
+                    codegenParameter.dataType = "String";
+                    codegenParameter.isString = true;
+                } else if (isMimetypeText(codegenParameter.contentType)) {
+                    codegenParameter.dataType = "String";
+                    codegenParameter.isString = true;
+                } else {
+                    codegenParameter.dataType = bytesType;
+                    codegenParameter.isBinary = true;
+                }
+            } else if (StringUtils.isNotBlank(originalSchema.get$ref())) {
                 // Undo the mess `super.fromRequestBody` made - re-wrap the inner
                 // type.
                 codegenParameter.dataType = getTypeDeclaration(originalSchema);
                 codegenParameter.isPrimitiveType = false;
                 codegenParameter.isArray = false;
                 codegenParameter.isString = false;
+                codegenParameter.isBinary = ModelUtils.isBinarySchema(originalSchema);
                 codegenParameter.isByteArray = ModelUtils.isByteArraySchema(originalSchema);
 
                 // This is a model, so should only have an example if explicitly
