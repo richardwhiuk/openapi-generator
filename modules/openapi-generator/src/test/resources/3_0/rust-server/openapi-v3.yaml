@@ -524,8 +524,13 @@ components:
           $ref: '#/components/schemas/AnyOfObject'
         optionalAnyOf:
           $ref: '#/components/schemas/12345AnyOfObject'
+        directRequiredAnyOf:
+          anyOf:
+          - $ref: '#/components/schemas/EnumWithStarObject'
+          - type: string
       required:
       - requiredAnyOf
+      - directRequiredAnyOf
     AnyOfObject:
       description: Test a model containing an anyOf
       anyOf:
