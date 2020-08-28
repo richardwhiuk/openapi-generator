@@ -617,6 +617,9 @@ components:
     AdditionalPropertiesWithNullable:
       type: object
       properties:
+        anyType: {}
+        nullableRefInteger:
+          $ref: '#/components/schemas/NullableInteger'
         nullableString:
           $ref: '#/components/schemas/NullableObject'
         nullableMap:
@@ -630,6 +633,11 @@ components:
         type: list
         items:
           type: string
+    NullableInteger:
+      type: integer
+      minimum: 1
+      maximum: 14
+      nullable: true
     NullableObject:
       type: string
       nullable: true

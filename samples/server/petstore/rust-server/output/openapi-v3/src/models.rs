@@ -152,6 +152,16 @@ impl AdditionalPropertiesWithList {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct AdditionalPropertiesWithNullable {
+    #[serde(rename = "anyType")]
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub any_type: Option<serde_json::Value>,
+
+    #[serde(rename = "nullableRefInteger")]
+    #[serde(deserialize_with = "swagger::nullable_format::deserialize_optional_nullable")]
+    #[serde(default = "swagger::nullable_format::default_optional_nullable")]
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub nullable_ref_integer: Option<swagger::Nullable<u8>>,
+
     #[serde(rename = "nullableString")]
     #[serde(deserialize_with = "swagger::nullable_format::deserialize_optional_nullable")]
     #[serde(default = "swagger::nullable_format::default_optional_nullable")]
@@ -169,6 +179,8 @@ impl AdditionalPropertiesWithNullable {
     #[allow(clippy::new_without_default)]
     pub fn new() -> AdditionalPropertiesWithNullable {
         AdditionalPropertiesWithNullable {
+            any_type: None,
+            nullable_ref_integer: None,
             nullable_string: None,
             nullable_map: None,
         }
@@ -180,6 +192,7 @@ impl AdditionalPropertiesWithNullable {
 /// Should be implemented in a serde serializer
 impl std::string::ToString for AdditionalPropertiesWithNullable {
     fn to_string(&self) -> String {
+<<<<<<< HEAD
         let params: Vec<Option<String>> = vec![
             self.nullable_string.as_ref().map(|nullable_string| {
                 [
@@ -189,6 +202,15 @@ impl std::string::ToString for AdditionalPropertiesWithNullable {
             }),
             // Skipping map nullableMap in query parameter serialization
         ];
+=======
+        let mut params: Vec<String> = vec![];
+        // Skipping non-primitive type anyType in query parameter serialization
+
+        if let Some(ref nullable_ref_integer) = self.nullable_ref_integer {
+            params.push("nullableRefInteger".to_string());
+            params.push(nullable_ref_integer.as_ref().map_or("null".to_string(), |x| x.to_string()));
+        }
+>>>>>>> 6aa15a0003c (Merge branch 'null_handling' into 'rust-openapi')
 
         params.into_iter().flatten().collect::<Vec<_>>().join(",")
     }
@@ -205,6 +227,8 @@ impl std::str::FromStr for AdditionalPropertiesWithNullable {
         #[derive(Default)]
         #[allow(dead_code)]
         struct IntermediateRep {
+            pub any_type: Vec<serde_json::Value>,
+            pub nullable_ref_integer: Vec<swagger::Nullable<u8>>,
             pub nullable_string: Vec<swagger::Nullable<String>>,
             pub nullable_map: Vec<std::collections::HashMap<String, swagger::Nullable<models::NullableObject>>>,
         }
@@ -224,6 +248,8 @@ impl std::str::FromStr for AdditionalPropertiesWithNullable {
             if let Some(key) = key_result {
                 #[allow(clippy::match_single_binding)]
                 match key {
+                        "anyType" => intermediate_rep.any_type.push(<serde_json::Value as std::str::FromStr>::from_str(val).map_err(|x| format!("{}", x))?),
+                    "nullableRefInteger" => return std::result::Result::Err("Parsing a nullable type in this style is not supported in AdditionalPropertiesWithNullable".to_string()),
                     "nullableString" => return std::result::Result::Err("Parsing a nullable type in this style is not supported in AdditionalPropertiesWithNullable".to_string()),
                     "nullableMap" => return std::result::Result::Err("Parsing a container in this style is not supported in AdditionalPropertiesWithNullable".to_string()),
                     _ => return std::result::Result::Err("Unexpected key while parsing AdditionalPropertiesWithNullable".to_string())
@@ -236,6 +262,8 @@ impl std::str::FromStr for AdditionalPropertiesWithNullable {
 
         // Use the intermediate representation to return the struct
         std::result::Result::Ok(AdditionalPropertiesWithNullable {
+            any_type: intermediate_rep.any_type.into_iter().next(),
+            nullable_ref_integer: std::result::Result::Err("Nullable types not supported in AdditionalPropertiesWithNullable".to_string())?,
             nullable_string: std::result::Result::Err("Nullable types not supported in AdditionalPropertiesWithNullable".to_string())?,
             nullable_map: intermediate_rep.nullable_map.into_iter().next(),
         })
@@ -2973,6 +3001,67 @@ impl MyIdList {
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
+pub struct NullableInteger(i32);
+
+impl std::convert::From<i32> for NullableInteger {
+    fn from(x: i32) -> Self {
+        NullableInteger(x)
+    }
+}
+
+impl std::convert::From<NullableInteger> for i32 {
+    fn from(x: NullableInteger) -> Self {
+        x.0
+    }
+}
+
+impl std::ops::Deref for NullableInteger {
+    type Target = i32;
+    fn deref(&self) -> &i32 {
+        &self.0
+    }
+}
+
+impl std::ops::DerefMut for NullableInteger {
+    fn deref_mut(&mut self) -> &mut i32 {
+        &mut self.0
+    }
+}
+
+/// Converts the NullableInteger value to the Query Parameters representation (style=form, explode=false)
+/// specified in https://swagger.io/docs/specification/serialization/
+/// Should be implemented in a serde serializer
+impl ::std::string::ToString for NullableInteger {
+    fn to_string(&self) -> String {
+        self.0.to_string()
+    }
+}
+
+/// Converts Query Parameters representation (style=form, explode=false) to a NullableInteger value
+/// as specified in https://swagger.io/docs/specification/serialization/
+/// Should be implemented in a serde deserializer
+impl ::std::str::FromStr for NullableInteger {
+    type Err = String;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match std::str::FromStr::from_str(s) {
+             std::result::Result::Ok(r) => std::result::Result::Ok(NullableInteger(r)),
+             std::result::Result::Err(e) => std::result::Result::Err(format!("Unable to convert {} to NullableInteger: {:?}", s, e)),
+        }
+    }
+}
+
+impl NullableInteger {
+    /// Helper function to allow us to convert this model to an XML string.
+    /// Will panic if serialisation fails.
+    #[allow(dead_code)]
+    pub(crate) fn to_xml(&self) -> String {
+        serde_xml_rs::to_string(&self).expect("impossible to fail to serialize")
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct NullableObject(String);
 
 impl std::convert::From<String> for NullableObject {
@@ -3770,7 +3859,7 @@ pub struct ObjectUntypedProps {
     pub required_untyped: serde_json::Value,
 
     #[serde(rename = "required_untyped_nullable")]
-    pub required_untyped_nullable: swagger::Nullable<serde_json::Value>,
+    pub required_untyped_nullable: serde_json::Value,
 
     #[serde(rename = "not_required_untyped")]
     #[serde(skip_serializing_if="Option::is_none")]
@@ -3784,8 +3873,12 @@ pub struct ObjectUntypedProps {
 
 
 impl ObjectUntypedProps {
+<<<<<<< HEAD
     #[allow(clippy::new_without_default)]
     pub fn new(required_untyped: serde_json::Value, required_untyped_nullable: swagger::Nullable<serde_json::Value>, ) -> ObjectUntypedProps {
+=======
+    pub fn new(required_untyped: serde_json::Value, required_untyped_nullable: serde_json::Value, ) -> ObjectUntypedProps {
+>>>>>>> 6aa15a0003c (Merge branch 'null_handling' into 'rust-openapi')
         ObjectUntypedProps {
             required_untyped,
             required_untyped_nullable,
@@ -3823,7 +3916,7 @@ impl std::str::FromStr for ObjectUntypedProps {
         #[allow(dead_code)]
         struct IntermediateRep {
             pub required_untyped: Vec<serde_json::Value>,
-            pub required_untyped_nullable: Vec<swagger::Nullable<serde_json::Value>>,
+            pub required_untyped_nullable: Vec<serde_json::Value>,
             pub not_required_untyped: Vec<serde_json::Value>,
             pub not_required_untyped_nullable: Vec<serde_json::Value>,
         }
@@ -3843,6 +3936,7 @@ impl std::str::FromStr for ObjectUntypedProps {
             if let Some(key) = key_result {
                 #[allow(clippy::match_single_binding)]
                 match key {
+<<<<<<< HEAD
                     #[allow(clippy::redundant_clone)]
                     "required_untyped" => intermediate_rep.required_untyped.push(<serde_json::Value as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     "required_untyped_nullable" => return std::result::Result::Err("Parsing a nullable type in this style is not supported in ObjectUntypedProps".to_string()),
@@ -3850,6 +3944,12 @@ impl std::str::FromStr for ObjectUntypedProps {
                     "not_required_untyped" => intermediate_rep.not_required_untyped.push(<serde_json::Value as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
                     "not_required_untyped_nullable" => intermediate_rep.not_required_untyped_nullable.push(<serde_json::Value as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+=======
+                        "required_untyped" => intermediate_rep.required_untyped.push(<serde_json::Value as std::str::FromStr>::from_str(val).map_err(|x| format!("{}", x))?),
+                        "required_untyped_nullable" => intermediate_rep.required_untyped_nullable.push(<serde_json::Value as std::str::FromStr>::from_str(val).map_err(|x| format!("{}", x))?),
+                        "not_required_untyped" => intermediate_rep.not_required_untyped.push(<serde_json::Value as std::str::FromStr>::from_str(val).map_err(|x| format!("{}", x))?),
+                        "not_required_untyped_nullable" => intermediate_rep.not_required_untyped_nullable.push(<serde_json::Value as std::str::FromStr>::from_str(val).map_err(|x| format!("{}", x))?),
+>>>>>>> 6aa15a0003c (Merge branch 'null_handling' into 'rust-openapi')
                     _ => return std::result::Result::Err("Unexpected key while parsing ObjectUntypedProps".to_string())
                 }
             }
@@ -3860,8 +3960,13 @@ impl std::str::FromStr for ObjectUntypedProps {
 
         // Use the intermediate representation to return the struct
         std::result::Result::Ok(ObjectUntypedProps {
+<<<<<<< HEAD
             required_untyped: intermediate_rep.required_untyped.into_iter().next().ok_or_else(|| "required_untyped missing in ObjectUntypedProps".to_string())?,
             required_untyped_nullable: std::result::Result::Err("Nullable types not supported in ObjectUntypedProps".to_string())?,
+=======
+            required_untyped: intermediate_rep.required_untyped.into_iter().next().ok_or("required_untyped missing in ObjectUntypedProps".to_string())?,
+            required_untyped_nullable: intermediate_rep.required_untyped_nullable.into_iter().next().ok_or("required_untyped_nullable missing in ObjectUntypedProps".to_string())?,
+>>>>>>> 6aa15a0003c (Merge branch 'null_handling' into 'rust-openapi')
             not_required_untyped: intermediate_rep.not_required_untyped.into_iter().next(),
             not_required_untyped_nullable: intermediate_rep.not_required_untyped_nullable.into_iter().next(),
         })

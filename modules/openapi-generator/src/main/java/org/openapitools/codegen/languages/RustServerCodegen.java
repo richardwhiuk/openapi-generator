@@ -25,6 +25,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.FileSchema;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.XML;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -1061,6 +1062,42 @@ public class RustServerCodegen extends AbstractRustCodegen implements CodegenCon
             }
         } else if (p instanceof FileSchema) {
             type = typeMapping.get("File").toString();
+        } else if (p instanceof IntegerSchema) {
+            BigInteger minimum = Optional.ofNullable(p.minimum).map(BigInteger::new).orElse(null);
+            BigInteger maximum = Optional.ofNullable(p.maximum).map(BigInteger::new).orElse(null);
+
+            boolean unsigned = canFitIntoUnsigned(minimum, p.getExclusiveMinimum());
+
+            if (Strings.isNullOrEmpty(p.dataFormat)) {
+                type = bestFittingIntegerType(minimum,
+                        p.exclusiveMinimum,
+                        maximum,
+                        p.exclusiveMaximum,
+                        true);
+            } else {
+                switch (p.format) {
+                    // custom integer formats (legacy)
+                    case "uint32":
+                        type = "u32";
+                        break;
+                    case "uint64":
+                        type = "u64";
+                        break;
+                    case "int32":
+                        type = unsigned ? "u32" : "i32";
+                        break;
+                    case "int64":
+                        type = unsigned ? "u64" : "i64";
+                        break;
+                    default:
+                        LOGGER.warn("The integer format '{}' is not recognized and will be ignored.", p.format);
+                        type = bestFittingIntegerType(minimum,
+                                p.exclusiveMinimum,
+                                maximum,
+                                p.exclusiveMaximum,
+                                true);
+                }
+            }
         } else {
             type = super.getTypeDeclaration(p);
         }
@@ -1069,7 +1106,7 @@ public class RustServerCodegen extends AbstractRustCodegen implements CodegenCon
         // layer of the referenced schema.
         Schema rp = ModelUtils.getReferencedSchema(openAPI, p);
 
-        if (rp.getNullable() == Boolean.TRUE) {
+        if (rp.getNullable() == Boolean.TRUE && !isAnyTypeSchema(rp))  {
             type = "swagger::Nullable<" + type + ">";
         }
 
@@ -1409,52 +1446,13 @@ public class RustServerCodegen extends AbstractRustCodegen implements CodegenCon
             if (property.dataType.contains(":")) {
                 int position = property.dataType.lastIndexOf(":");
                 property.dataType = property.dataType.substring(0, position) + camelize(property.dataType.substring(position));
+                LOGGER.debug("Camelized with colon:" + property.baseName + " -> " + property.dataType);
             } else {
                 property.dataType = camelize(property.dataType);
             }
             property.isPrimitiveType = property.isContainer && languageSpecificPrimitives.contains(typeMapping.get(stripNullable(property.complexType)));
         } else {
             property.isPrimitiveType = true;
-        }
-
-        // Integer type fitting
-        if (Objects.equals(property.baseType, "integer")) {
-
-            BigInteger minimum = Optional.ofNullable(property.getMinimum()).map(BigInteger::new).orElse(null);
-            BigInteger maximum = Optional.ofNullable(property.getMaximum()).map(BigInteger::new).orElse(null);
-
-            boolean unsigned = canFitIntoUnsigned(minimum, property.getExclusiveMinimum());
-
-            if (Strings.isNullOrEmpty(property.dataFormat)) {
-                property.dataType = bestFittingIntegerType(minimum,
-                        property.getExclusiveMinimum(),
-                        maximum,
-                        property.getExclusiveMaximum(),
-                        true);
-            } else {
-                switch (property.dataFormat) {
-                    // custom integer formats (legacy)
-                    case "uint32":
-                        property.dataType = "u32";
-                        break;
-                    case "uint64":
-                        property.dataType = "u64";
-                        break;
-                    case "int32":
-                        property.dataType = unsigned ? "u32" : "i32";
-                        break;
-                    case "int64":
-                        property.dataType = unsigned ? "u64" : "i64";
-                        break;
-                    default:
-                        LOGGER.warn("The integer format '{}' is not recognized and will be ignored.", property.dataFormat);
-                        property.dataType = bestFittingIntegerType(minimum,
-                                property.getExclusiveMinimum(),
-                                maximum,
-                                property.getExclusiveMaximum(),
-                                true);
-                }
-            }
         }
 
         property.name = underscore(property.name);
@@ -1469,7 +1467,7 @@ public class RustServerCodegen extends AbstractRustCodegen implements CodegenCon
         // the type from the value. If the property has no type, at this point it will have
         // baseType "object" allowing us to identify such properties. Moreover, set to not
         // nullable, we can use the serde_json::Value::Null enum variant.
-        if ("object".equals(property.baseType)) {
+        if ("object".equals(property.baseType) || "AnyType".equals(property.baseType)) {
             property.dataType = "serde_json::Value";
             property.isNullable = false;
         }

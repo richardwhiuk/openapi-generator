@@ -382,8 +382,8 @@ pub trait Api<C: Send + Sync> {
         double: f64,
         pattern_without_delimiter: String,
         byte: swagger::ByteArray,
-        integer: Option<i32>,
-        int32: Option<i32>,
+        integer: Option<u32>,
+        int32: Option<u32>,
         int64: Option<i64>,
         float: Option<f32>,
         string: Option<String>,
@@ -488,6 +488,15 @@ pub trait Api<C: Send + Sync> {
         &self,
         context: &C) -> Result<GetInventoryResponse, ApiError>;
 
+<<<<<<< HEAD
+=======
+    /// Find purchase order by ID
+    async fn get_order_by_id(
+        &self,
+        order_id: u64,
+        context: &C) -> Result<GetOrderByIdResponse, ApiError>;
+
+>>>>>>> 6aa15a0003c (Merge branch 'null_handling' into 'rust-openapi')
     /// Place an order for a pet
     async fn place_order(
         &self,
@@ -619,8 +628,8 @@ pub trait ApiNoContext<C: Send + Sync> {
         double: f64,
         pattern_without_delimiter: String,
         byte: swagger::ByteArray,
-        integer: Option<i32>,
-        int32: Option<i32>,
+        integer: Option<u32>,
+        int32: Option<u32>,
         int64: Option<i64>,
         float: Option<f32>,
         string: Option<String>,
@@ -725,6 +734,15 @@ pub trait ApiNoContext<C: Send + Sync> {
         &self,
         ) -> Result<GetInventoryResponse, ApiError>;
 
+<<<<<<< HEAD
+=======
+    /// Find purchase order by ID
+    async fn get_order_by_id(
+        &self,
+        order_id: u64,
+        ) -> Result<GetOrderByIdResponse, ApiError>;
+
+>>>>>>> 6aa15a0003c (Merge branch 'null_handling' into 'rust-openapi')
     /// Place an order for a pet
     async fn place_order(
         &self,
@@ -906,8 +924,8 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
         double: f64,
         pattern_without_delimiter: String,
         byte: swagger::ByteArray,
-        integer: Option<i32>,
-        int32: Option<i32>,
+        integer: Option<u32>,
+        int32: Option<u32>,
         int64: Option<i64>,
         float: Option<f32>,
         string: Option<String>,
@@ -1072,6 +1090,19 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
         self.api().get_inventory(&context).await
     }
 
+<<<<<<< HEAD
+=======
+    /// Find purchase order by ID
+    async fn get_order_by_id(
+        &self,
+        order_id: u64,
+        ) -> Result<GetOrderByIdResponse, ApiError>
+    {
+        let context = self.context().clone();
+        self.api().get_order_by_id(order_id, &context).await
+    }
+
+>>>>>>> 6aa15a0003c (Merge branch 'null_handling' into 'rust-openapi')
     /// Place an order for a pet
     async fn place_order(
         &self,

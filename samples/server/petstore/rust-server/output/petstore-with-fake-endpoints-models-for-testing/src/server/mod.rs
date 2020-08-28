@@ -2339,6 +2339,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     (body)
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
+<<<<<<< HEAD
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
@@ -2346,6 +2347,115 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     // JSON Body
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
+=======
+
+            // application/json
+            response.headers_mut().insert(
+                CONTENT_TYPE,
+                HeaderValue::from_str("application/json")
+                    .expect("Unable to create Content-Type header for application/json"));
+            // JSON Body
+            let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
+            *response.body_mut() = Body::from(body);
+
+
+                                                },
+                                            },
+                                            Err(_) => {
+                                                // Application code returned an error. This should not happen, as the implementation should
+                                                // return a valid response.
+                                                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                                                *response.body_mut() = Body::from("An internal error occurred");
+                                            },
+                                        }
+
+                                        Ok(response)
+            },
+
+            // GetOrderById - GET /store/order/{order_id}
+            &hyper::Method::GET if path.matched(paths::ID_STORE_ORDER_ORDER_ID) => {
+                // Path parameters
+                let path: &str = &uri.path().to_string();
+                let path_params =
+                    paths::REGEX_STORE_ORDER_ORDER_ID
+                    .captures(&path)
+                    .unwrap_or_else(||
+                        panic!("Path {} matched RE STORE_ORDER_ORDER_ID in set but failed match against \"{}\"", path, paths::REGEX_STORE_ORDER_ORDER_ID.as_str())
+                    );
+
+                let param_order_id = match percent_encoding::percent_decode(path_params["order_id"].as_bytes()).decode_utf8() {
+                    Ok(param_order_id) => match param_order_id.parse::<u64>() {
+                        Ok(param_order_id) => param_order_id,
+                        Err(e) => return Ok(Response::builder()
+                                        .status(StatusCode::BAD_REQUEST)
+                                        .body(Body::from(format!("Couldn't parse path parameter order_id: {}", e)))
+                                        .expect("Unable to create Bad Request response for invalid path parameter")),
+                    },
+                    Err(_) => return Ok(Response::builder()
+                                        .status(StatusCode::BAD_REQUEST)
+                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["order_id"])))
+                                        .expect("Unable to create Bad Request response for invalid percent decode"))
+                };
+
+                                let result = api_impl.get_order_by_id(
+                                            param_order_id,
+                                        &context
+                                    ).await;
+                                let mut response = Response::new(Body::empty());
+                                response.headers_mut().insert(
+                                            HeaderName::from_static("x-span-id"),
+                                            HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().to_string().as_str())
+                                                .expect("Unable to create X-Span-ID header value"));
+
+                                        match result {
+                                            Ok(rsp) => match rsp {
+                                                GetOrderByIdResponse::SuccessfulOperation
+                                                    (body)
+
+                                                => {
+                                                    *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
+
+    let body = match body {
+        swagger::OneOf2::<models::GetOrderById200ApplicationXmlResponse, models::GetOrderById200ApplicationJsonResponse>::A(body) => {
+            let body : models::Order = body.into();
+            // application/xml
+            response.headers_mut().insert(
+                CONTENT_TYPE,
+                HeaderValue::from_str("application/xml")
+                    .expect("Unable to create Content-Type header for application/xml"));
+            // XML Body
+            let body = serde_xml_rs::to_string(&body).expect("impossible to fail to serialize");
+            *response.body_mut() = Body::from(body);
+
+        },
+        swagger::OneOf2::<models::GetOrderById200ApplicationXmlResponse, models::GetOrderById200ApplicationJsonResponse>::B(body) => {
+            let body : models::Order = body.into();
+            // application/json
+            response.headers_mut().insert(
+                CONTENT_TYPE,
+                HeaderValue::from_str("application/json")
+                    .expect("Unable to create Content-Type header for application/json"));
+            // JSON Body
+            let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
+            *response.body_mut() = Body::from(body);
+
+        },
+    };
+
+                                                },
+                                                GetOrderByIdResponse::InvalidIDSupplied
+                                                => {
+                                                    *response.status_mut() = StatusCode::from_u16(400).expect("Unable to turn 400 into a StatusCode");
+
+
+
+                                                },
+                                                GetOrderByIdResponse::OrderNotFound
+                                                => {
+                                                    *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
+
+
+>>>>>>> 6aa15a0003c (Merge branch 'null_handling' into 'rust-openapi')
 
                                                 },
                                             },

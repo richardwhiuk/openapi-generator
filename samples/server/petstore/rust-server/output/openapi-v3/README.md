@@ -168,6 +168,7 @@ Method | HTTP request | Description
  - [MultigetGet201Response](docs/MultigetGet201Response.md)
  - [MyId](docs/MyId.md)
  - [MyIdList](docs/MyIdList.md)
+ - [NullableInteger](docs/NullableInteger.md)
  - [NullableObject](docs/NullableObject.md)
  - [NullableTest](docs/NullableTest.md)
  - [ObjectHeader](docs/ObjectHeader.md)

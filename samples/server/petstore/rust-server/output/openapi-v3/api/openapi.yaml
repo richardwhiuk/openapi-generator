@@ -629,6 +629,12 @@ components:
       type: integer
     AdditionalPropertiesWithNullable:
       properties:
+        anyType: {}
+        nullableRefInteger:
+          maximum: 14
+          minimum: 1
+          nullable: true
+          type: integer
         nullableString:
           nullable: true
           type: string
@@ -644,6 +650,11 @@ components:
         type: array
       maxProperties: 1
       type: object
+    NullableInteger:
+      maximum: 14
+      minimum: 1
+      nullable: true
+      type: integer
     NullableObject:
       nullable: true
       type: string

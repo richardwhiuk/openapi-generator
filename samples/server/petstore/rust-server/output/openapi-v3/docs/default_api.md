@@ -243,7 +243,37 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # ****
+<<<<<<< HEAD
 > models::OneOfGet200Response ()
+=======
+> (path_param_a, path_param_b)
+
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+  **path_param_a** | **String**|  | 
+  **path_param_b** | **String**|  | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# ****
+> swagger::OneOf2<isize,Vec<String>> ()
+>>>>>>> 6aa15a0003c (Merge branch 'null_handling' into 'rust-openapi')
 
 
 ### Required Parameters
@@ -251,7 +281,11 @@ This endpoint does not need any parameter.
 
 ### Return type
 
+<<<<<<< HEAD
 [**models::OneOfGet200Response**](_one_of_get_200_response.md)
+=======
+[**swagger::OneOf2<isize,Vec<String>>**](swagger::OneOf2<isize,Vec<String>>.md)
+>>>>>>> 6aa15a0003c (Merge branch 'null_handling' into 'rust-openapi')
 
 ### Authorization
 

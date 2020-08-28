@@ -109,7 +109,11 @@ pub enum MultipleAuthSchemeGetResponse {
 pub enum OneOfGetResponse {
     /// Success
     Success
+<<<<<<< HEAD
     (models::OneOfGet200Response)
+=======
+    (swagger::OneOf2<isize,Vec<String>>)
+>>>>>>> 6aa15a0003c (Merge branch 'null_handling' into 'rust-openapi')
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
