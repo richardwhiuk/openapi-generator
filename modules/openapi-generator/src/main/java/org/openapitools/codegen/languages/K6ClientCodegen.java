@@ -33,23 +33,31 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.google.common.collect.ImmutableMap;
-import lombok.Getter;
-import lombok.Setter;
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.openapitools.codegen.*;
+import org.apache.commons.text.StringEscapeUtils;
+import org.openapitools.codegen.CodegenConfig;
+import org.openapitools.codegen.CodegenConstants;
+import org.openapitools.codegen.CodegenModel;
+import org.openapitools.codegen.CodegenOperation;
+import org.openapitools.codegen.CodegenParameter;
+import org.openapitools.codegen.CodegenProperty;
+import org.openapitools.codegen.CodegenResponse;
+import org.openapitools.codegen.CodegenSecurity;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.DefaultCodegen;
+import org.openapitools.codegen.GeneratorLanguage;
+import org.openapitools.codegen.SupportingFile;
 import org.openapitools.codegen.meta.GeneratorMetadata;
 import org.openapitools.codegen.meta.Stability;
 import org.openapitools.codegen.utils.ModelUtils;
@@ -58,6 +66,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableMap;
 import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Mustache.Lambda;
 import com.samskivert.mustache.Template;
@@ -75,6 +84,8 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import lombok.Getter;
+import lombok.Setter;
 
 public class K6ClientCodegen extends DefaultCodegen implements CodegenConfig {
 

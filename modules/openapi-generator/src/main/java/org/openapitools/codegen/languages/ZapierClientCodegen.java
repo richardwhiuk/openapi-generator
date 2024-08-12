@@ -16,19 +16,30 @@
 
 package org.openapitools.codegen.languages;
 
-import io.swagger.v3.core.util.Json;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.responses.ApiResponse;
-import org.openapitools.codegen.*;
+import static org.openapitools.codegen.utils.StringUtils.escape;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import org.openapitools.codegen.CodegenConfig;
+import org.openapitools.codegen.CodegenResponse;
+import org.openapitools.codegen.CodegenType;
+import org.openapitools.codegen.DefaultCodegen;
+import org.openapitools.codegen.GeneratorLanguage;
+import org.openapitools.codegen.SupportingFile;
 import org.openapitools.codegen.meta.GeneratorMetadata;
 import org.openapitools.codegen.meta.Stability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.*;
-
-import static org.openapitools.codegen.utils.StringUtils.escape;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 
 public class ZapierClientCodegen extends DefaultCodegen implements CodegenConfig {
     public static final String PROJECT_NAME = "projectName";
