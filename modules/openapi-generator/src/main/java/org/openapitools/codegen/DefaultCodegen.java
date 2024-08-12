@@ -668,7 +668,7 @@ public class DefaultCodegen implements CodegenConfig {
     private boolean codegenPropertyIsNew(CodegenModel model, CodegenProperty property) {
         return model.parentModel == null
                 ? false
-                : model.parentModel.allVars.stream().anyMatch(p -> 
+                : model.parentModel.allVars.stream().anyMatch(p ->
                     p.name.equals(property.name) &&
                     (p.dataType.equals(property.dataType) == false || p.datatypeWithEnum.equals(property.datatypeWithEnum) == false || p.isDiscriminator));
     }

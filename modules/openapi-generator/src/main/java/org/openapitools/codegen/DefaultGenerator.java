@@ -97,7 +97,7 @@ public class DefaultGenerator implements Generator {
     private Map<String, String> generatorPropertyDefaults = new HashMap<>();
     /**
      *  Retrieves an instance to the configured template processor, available after user-defined options are
-     *  applied via 
+     *  applied via
      */
     @Getter protected TemplateProcessor templateProcessor = null;
 
@@ -544,7 +544,7 @@ public class DefaultGenerator implements Generator {
                 }
             }
         }
-        
+
         // generate files based on processed models
         for (String modelName : allProcessedModels.keySet()) {
             ModelsMap models = allProcessedModels.get(modelName);

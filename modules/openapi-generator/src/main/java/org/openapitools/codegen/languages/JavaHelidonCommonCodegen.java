@@ -237,7 +237,7 @@ public abstract class JavaHelidonCommonCodegen extends AbstractJavaCodegen
         if (!userHelidonVersion.isEmpty()) {
             if (!userParentVersion.isEmpty() && !userHelidonVersion.equals(userParentVersion)) {
                 throw new IllegalArgumentException(
-                        String.format(Locale.ROOT, 
+                        String.format(Locale.ROOT,
                                 "Both %s and %s properties were set with different value.",
                                 CodegenConstants.PARENT_VERSION,
                                 HELIDON_VERSION));

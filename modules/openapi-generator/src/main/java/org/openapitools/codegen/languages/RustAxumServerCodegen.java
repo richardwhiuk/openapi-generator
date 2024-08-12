@@ -509,7 +509,7 @@ public class RustAxumServerCodegen extends AbstractRustCodegen implements Codege
                 );
                 rsp.vendorExtensions.put("x-response-id", responseId);
             }
-            
+
             if (rsp.dataType != null) {
                 // Get the mimetype which is produced by this response. Note
                 // that although in general responses produces a set of
@@ -585,12 +585,12 @@ public class RustAxumServerCodegen extends AbstractRustCodegen implements Codege
             }
         }
 
-        // Include renderUuidConversionImpl exactly once in the vendorExtensions map when 
-        // at least one `uuid::Uuid` converted from a header value in the resulting Rust code. 
+        // Include renderUuidConversionImpl exactly once in the vendorExtensions map when
+        // at least one `uuid::Uuid` converted from a header value in the resulting Rust code.
         final Boolean renderUuidConversionImpl = op.headerParams.stream().anyMatch(h -> h.getDataType().equals(uuidType));
         if (renderUuidConversionImpl) {
             additionalProperties.put("renderUuidConversionImpl", "true");
-        }        
+        }
         return op;
     }
 
