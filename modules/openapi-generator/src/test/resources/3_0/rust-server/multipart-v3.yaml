@@ -73,8 +73,120 @@ paths:
       responses:
         200:
           description: OK
+  /multipart-multiple-options:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/string_object'
+          multipart/related:  # message with binary body part(s)
+            schema:
+              $ref: '#/components/schemas/multipart_related_request'
+            encoding:
+              object_field:
+                contentType:  application/json
+              optional_binary_field:
+                contentType:  application/zip
+                headers:
+                  Content-Id:
+                    schema:
+                      type: string
+              required_binary_field:
+                contentType:  image/png
+                headers:
+                  Content-Id:
+                    schema:
+                      type: string
+      responses:
+        200:
+          description: OK
+  /multipart-optional-multiple-options:
+    post:
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/string_object'
+          multipart/related:  # message with binary body part(s)
+            schema:
+              $ref: '#/components/schemas/multipart_related_request'
+            encoding:
+              object_field:
+                contentType:  application/json
+              optional_binary_field:
+                contentType:  application/zip
+                headers:
+                  Content-Id:
+                    schema:
+                      type: string
+              required_binary_field:
+                contentType:  image/png
+                headers:
+                  Content-Id:
+                    schema:
+                      type: string
+      responses:
+        200:
+          description: OK
+  /multipart-single-response:
+    get:
+      responses:
+        200:
+          description: OK
+          content:
+            multipart/related:  # message with binary body part(s)
+              schema:
+                type: object
+                properties: # Request parts
+                  object_field:
+                    $ref: '#/components/schemas/string_object'
+                  optional_binary_field:
+                    type: string
+                    format: binary
+              encoding:
+                object_field:
+                  contentType:  application/json
+                optional_binary_field:
+                  contentType:  application/zip
+                  headers:
+                    Content-Id:
+                      schema:
+                        type: string
+  /multipart-multiple-responses:
+    get:
+      responses:
+        200:
+          description: OK
+          content:
+            application/json: # message without binary body part
+              schema:
+                $ref: '#/components/schemas/string_object'
+            multipart/related:  # message with binary body part(s)
+              schema:
+                type: object
+                properties: # Request parts
+                  object_field:
+                    $ref: '#/components/schemas/string_object'
+                  optional_binary_field:
+                    type: string
+                    format: binary
+              encoding:
+                object_field:
+                  contentType:  application/json
+                optional_binary_field:
+                  contentType:  application/zip
+                  headers:
+                    Content-Id:
+                      schema:
+                        type: string
+
 components:
   schemas:
+    string_object:
+      type: string
     multipart_request:
       type: object
       required:
