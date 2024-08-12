@@ -552,6 +552,7 @@ public class DefaultGenerator implements Generator {
             try {
                 //don't generate models that have a schema mapping
                 if (config.schemaMapping().containsKey(modelName)) {
+                    LOGGER.info("Model {} not generated since there is a schema mapping", modelName);
                     continue;
                 }
 
@@ -564,7 +565,8 @@ public class DefaultGenerator implements Generator {
                         if (m.isAlias) {
                             // alias to number, string, enum, etc, which should not be generated as model
                             // but aliases are still used to dereference models in some languages (such as in html2).
-                            aliasModels.add(modelTemplate);  // Store aliases in the separate list.
+                            aliasModels.add(modelTemplate); // Store aliases in the separate list.
+                            LOGGER.info("Model {} not generated as it is an alias", modelName);
                             continue;  // Don't create user-defined classes for aliases
                         }
                     }
