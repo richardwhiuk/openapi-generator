@@ -2384,7 +2384,10 @@ public class DefaultCodegen implements CodegenConfig {
      */
     @SuppressWarnings("static-method")
     public String toOneOfName(List<String> names, Schema composedSchema) {
-        Map<String, Object> exts = composedSchema.getExtensions();
+        Map<String, Object> exts = null;
+        if (composedSchema != null) {
+            exts = composedSchema.getExtensions();
+        }
         if (exts != null && exts.containsKey("x-one-of-name")) {
             return (String) exts.get("x-one-of-name");
         }
