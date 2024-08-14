@@ -483,13 +483,12 @@ impl<S, C> Api<C> for Client<S, C> where
             .expect("Failed to write multipart body");
 
 
-        let header = "multipart/related";
         request.headers_mut().insert(CONTENT_TYPE,
-        match HeaderValue::from_bytes(
-            &[header.as_bytes(), "; boundary=".as_bytes(), &boundary, "; type=\"application/json\"".as_bytes()].concat()
-        ) {
-            Ok(h) => h,
-            Err(e) => return Err(ApiError(format!("Unable to create header: {} - {}", header, e)))
+            match HeaderValue::from_bytes(
+                &["multipart/related; boundary=".as_bytes(), &boundary].concat()
+            ) {
+                Ok(h) => h,
+                Err(e) => return Err(ApiError(format!("Unable to create multipart/related header - {}", e)))
         });
 
         // Add the message body to the request object.
@@ -764,13 +763,12 @@ impl<S, C> Api<C> for Client<S, C> where
             .expect("Failed to write multipart body");
 
 
-        let header = "multipart/related";
         request.headers_mut().insert(CONTENT_TYPE,
-        match HeaderValue::from_bytes(
-            &[header.as_bytes(), "; boundary=".as_bytes(), &boundary, "; type=\"application/json\"".as_bytes()].concat()
-        ) {
-            Ok(h) => h,
-            Err(e) => return Err(ApiError(format!("Unable to create header: {} - {}", header, e)))
+            match HeaderValue::from_bytes(
+                &["multipart/related; boundary=".as_bytes(), &boundary].concat()
+            ) {
+                Ok(h) => h,
+                Err(e) => return Err(ApiError(format!("Unable to create multipart/related header - {}", e)))
         });
 
         // Add the message body to the request object.
