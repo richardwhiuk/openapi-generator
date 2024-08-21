@@ -23,7 +23,8 @@ use mime::Mime;
 use std::io::Cursor;
 use multipart::client::lazy::Multipart;
 use hyper_0_10::header::{Headers, ContentType};
-use mime_multipart::{Node, Part, write_multipart};
+use log::warn;
+use mime_multipart::{read_multipart_body, Node, Part, write_multipart};
 
 use crate::models;
 use crate::header;
@@ -41,8 +42,12 @@ const FRAGMENT_ENCODE_SET: &AsciiSet = &percent_encoding::CONTROLS
 const ID_ENCODE_SET: &AsciiSet = &FRAGMENT_ENCODE_SET.add(b'|');
 
 use crate::{Api,
+     MultipartMultipleOptionsPostResponse,
+     MultipartMultipleResponsesGetResponse,
+     MultipartOptionalMultipleOptionsPostResponse,
      MultipartRelatedRequestPostResponse,
      MultipartRequestPostResponse,
+     MultipartSingleResponseGetResponse,
      MultipleIdenticalMimeTypesPostResponse
      };
 
@@ -387,6 +392,498 @@ impl<S, C> Api<C> for Client<S, C> where
         }
     }
 
+    async fn multipart_multiple_options_post(
+        &self,
+        param_body: swagger::OneOf2<models::MultipartMultipleOptionsPostApplicationSlashJsonRequest,models::MultipartMultipleOptionsPostMultipartSlashRelatedRequest>,
+        context: &C) -> Result<MultipartMultipleOptionsPostResponse, ApiError>
+    {
+        let mut client_service = self.client_service.clone();
+        let mut uri = format!(
+            "{}/multipart-multiple-options",
+            self.base_path
+        );
+
+        // Query parameters
+        let query_string = {
+            let mut query_string = form_urlencoded::Serializer::new("".to_owned());
+            query_string.finish()
+        };
+        if !query_string.is_empty() {
+            uri += "?";
+            uri += &query_string;
+        }
+
+        let uri = match Uri::from_str(&uri) {
+            Ok(uri) => uri,
+            Err(err) => return Err(ApiError(format!("Unable to build URI: {}", err))),
+        };
+
+        let mut request = match Request::builder()
+            .method("POST")
+            .uri(uri)
+            .body(Body::empty()) {
+                Ok(req) => req,
+                Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
+        };
+
+      match param_body {
+    swagger::OneOf2::<models::MultipartMultipleOptionsPostApplicationSlashJsonRequest, models::MultipartMultipleOptionsPostMultipartSlashRelatedRequest>::A(body) => {
+            let body : models::StringObject = body.into();
+            let param_body = body;
+
+        // Consumes basic body
+        // Body parameter
+        let body = serde_json::to_string(&param_body).expect("impossible to fail to serialize");
+        *request.body_mut() = Body::from(body);
+
+        let header = "application/json";
+        request.headers_mut().insert(CONTENT_TYPE, match HeaderValue::from_str(header) {
+            Ok(h) => h,
+            Err(e) => return Err(ApiError(format!("Unable to create header: {} - {}", header, e)))
+        });
+
+        },
+    swagger::OneOf2::<models::MultipartMultipleOptionsPostApplicationSlashJsonRequest, models::MultipartMultipleOptionsPostMultipartSlashRelatedRequest>::B(body) => {
+            let body : models::MultipartRelatedRequest = body.into();
+            let param_object_field = body.object_field;
+            let param_optional_binary_field = body.optional_binary_field;
+            let param_required_binary_field = body.required_binary_field;
+
+        // Consumes multipart/related body
+        let boundary = swagger::multipart::related::generate_boundary();
+        let mut body_parts = vec![];
+
+        if let Some(object_field) = param_object_field {
+            let part = Node::Part(Part {
+                headers: {
+                    let mut h = Headers::new();
+                    h.set(ContentType("".parse().unwrap()));
+                    h.set_raw("Content-ID", vec![b"object_field".to_vec()]);
+                    h
+                },
+                body: serde_json::to_string(&object_field)
+                    .expect("Impossible to fail to serialize")
+                    .into_bytes(),
+            });
+            body_parts.push(part);
+        }
+
+        if let Some(optional_binary_field) = param_optional_binary_field {
+            let part = Node::Part(Part {
+                headers: {
+                    let mut h = Headers::new();
+                    h.set(ContentType("".parse().unwrap()));
+                    h.set_raw("Content-ID", vec![b"optional_binary_field".to_vec()]);
+                    h
+                },
+                body: optional_binary_field.0,
+            });
+            body_parts.push(part);
+        }
+
+        {
+            let part = Node::Part(Part {
+                headers: {
+                    let mut h = Headers::new();
+                    h.set(ContentType("".parse().unwrap()));
+                    h.set_raw("Content-ID", vec![b"required_binary_field".to_vec()]);
+                    h
+                },
+                body: param_required_binary_field.0,
+            });
+            body_parts.push(part);
+        }
+
+        // Write the body into a vec.
+        // RFC 13341 Section 7.2.1 suggests that the body should begin with a
+        // CRLF prior to the first boundary. The mime_multipart library doesn't
+        // do this, so we do it instead.
+        let mut body: Vec<u8> = vec![b'\r', b'\n'];
+        write_multipart(&mut body, &boundary, &body_parts)
+            .expect("Failed to write multipart body");
+
+
+        request.headers_mut().insert(CONTENT_TYPE,
+            match HeaderValue::from_bytes(
+                &["multipart/related; boundary=".as_bytes(), &boundary].concat()
+            ) {
+                Ok(h) => h,
+                Err(e) => return Err(ApiError(format!("Unable to create multipart/related header - {}", e)))
+        });
+
+        // Add the message body to the request object.
+        *request.body_mut() = Body::from(body);
+
+        },
+      }
+
+        let header = HeaderValue::from_str(Has::<XSpanIdString>::get(context).0.as_str());
+        request.headers_mut().insert(HeaderName::from_static("x-span-id"), match header {
+            Ok(h) => h,
+            Err(e) => return Err(ApiError(format!("Unable to create X-Span ID header value: {}", e)))
+        });
+
+        let response = client_service.call((request, context.clone()))
+            .map_err(|e| ApiError(format!("No response received: {}", e))).await?;
+
+        match response.status().as_u16() {
+            200 => {
+                let (header, body) = response.into_parts();
+                Ok(
+                    MultipartMultipleOptionsPostResponse::OK
+                )
+            }
+            code => {
+                let headers = response.headers().clone();
+                let body = response.into_body()
+                       .take(100)
+                       .into_raw().await;
+                Err(ApiError(format!("Unexpected response code {}:\n{:?}\n\n{}",
+                    code,
+                    headers,
+                    match body {
+                        Ok(body) => match String::from_utf8(body) {
+                            Ok(body) => body,
+                            Err(e) => format!("<Body was not UTF8: {:?}>", e),
+                        },
+                        Err(e) => format!("<Failed to read body: {}>", e),
+                    }
+                )))
+            }
+        }
+    }
+
+    async fn multipart_multiple_responses_get(
+        &self,
+        context: &C) -> Result<MultipartMultipleResponsesGetResponse, ApiError>
+    {
+        let mut client_service = self.client_service.clone();
+        let mut uri = format!(
+            "{}/multipart-multiple-responses",
+            self.base_path
+        );
+
+        // Query parameters
+        let query_string = {
+            let mut query_string = form_urlencoded::Serializer::new("".to_owned());
+            query_string.finish()
+        };
+        if !query_string.is_empty() {
+            uri += "?";
+            uri += &query_string;
+        }
+
+        let uri = match Uri::from_str(&uri) {
+            Ok(uri) => uri,
+            Err(err) => return Err(ApiError(format!("Unable to build URI: {}", err))),
+        };
+
+        let mut request = match Request::builder()
+            .method("GET")
+            .uri(uri)
+            .body(Body::empty()) {
+                Ok(req) => req,
+                Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
+        };
+
+        // No schema variants
+
+
+        let header = HeaderValue::from_str(Has::<XSpanIdString>::get(context).0.as_str());
+        request.headers_mut().insert(HeaderName::from_static("x-span-id"), match header {
+            Ok(h) => h,
+            Err(e) => return Err(ApiError(format!("Unable to create X-Span ID header value: {}", e)))
+        });
+
+        let response = client_service.call((request, context.clone()))
+            .map_err(|e| ApiError(format!("No response received: {}", e))).await?;
+
+        match response.status().as_u16() {
+            200 => {
+                let (header, body) = response.into_parts();
+                let body = body
+                        .into_raw()
+                        .map_err(|e| ApiError(format!("Failed to read response: {}", e))).await?;
+
+  // Body has multiple variant schemas
+  let content_type = if let Some(content_type) = header.headers.get(CONTENT_TYPE) {
+      content_type.to_str()
+  } else {
+      return Err(ApiError(String::from("Missing content type header")));
+  };
+
+  let content_type = content_type.map(|s|
+      s.split(';').next().expect("Spliting content type header failed").trim());
+
+  let body = match content_type {
+      Ok("application/json") => {
+                // application/json
+                let body = str::from_utf8(&body)
+                    .map_err(|e| ApiError(format!("Response was not valid UTF8: {}", e)))?;
+                let body = serde_json::from_str::<models::StringObject>(body)
+                    .map_err(|e| ApiError(format!("Response body did not match the schema: {}", e)))?;
+
+          let body : models::MultipartMultipleResponsesGet200ApplicationSlashJsonResponse = models::MultipartMultipleResponsesGet200ApplicationSlashJsonResponse::from(body);
+
+          swagger::OneOf2::<models::MultipartMultipleResponsesGet200ApplicationSlashJsonResponse, models::MultipartMultipleResponsesGet200MultipartSlashRelatedResponse>::A(body)
+      },
+      Ok("multipart/related") => {
+                // multipart/related
+// Create headers from top-level content type header.
+let multipart_headers = match swagger::multipart::related::create_multipart_headers(header.headers.get(CONTENT_TYPE)) {
+    Ok(headers) => headers,
+    Err(e) => {
+        return Err(ApiError(e));
+    }
+};
+
+// &*body expresses the body as a byteslice, &mut provides a
+// mutable reference to that byteslice.
+let nodes = match read_multipart_body(&mut&*body, &multipart_headers, false) {
+    Ok(nodes) => nodes,
+    Err(e) => {
+        return Err(ApiError(format!("Could not read multipart body for MultipartMultipleResponsesGet: {}", e)));
+    }
+};
+
+let mut param_object_field = None;
+let mut param_optional_binary_field = None;
+
+for node in nodes {
+    if let Node::Part(part) = node {
+        let content_type = part.content_type().map(|x| format!("{}",x));
+        match content_type.as_ref().map(|x| x.as_str()) {
+            Some("") if param_object_field.is_none() => {
+                // Extract JSON part.
+                let deserializer = &mut serde_json::Deserializer::from_slice(part.body.as_slice());
+                let json_data: String = match serde_ignored::deserialize(deserializer, |path| {
+                    warn!("Ignoring unknown field in JSON part: {}", path);
+                }) {
+                    Ok(json_data) => json_data,
+                    Err(e) => return Err(ApiError(format!("Couldn't parse body parameter String - doesn't match schema: {}", e)))
+                };
+                // Push JSON part to return object.
+                param_object_field.get_or_insert(json_data);
+            },
+            Some("") if param_optional_binary_field.is_none() => {
+                param_optional_binary_field.get_or_insert(swagger::ByteArray(part.body));
+            },
+            Some(content_type) => {
+                warn!("Ignoring unexpected content type: {}", content_type);
+            },
+            None => {
+                warn!("Missing content type");
+            },
+        }
+    } else {
+        return Err(ApiError(format!("Unexpected part in multipart body for MultipartMultipleResponsesGet: {:?}", node)));
+    }
+}
+
+// Check that the required multipart chunks are present.
+              let body = models::MultipartSingleResponseGet200Response {
+                  object_field: param_object_field,
+                  optional_binary_field: param_optional_binary_field,
+              };
+
+
+          let body : models::MultipartMultipleResponsesGet200MultipartSlashRelatedResponse = models::MultipartMultipleResponsesGet200MultipartSlashRelatedResponse::from(body);
+
+          swagger::OneOf2::<models::MultipartMultipleResponsesGet200ApplicationSlashJsonResponse, models::MultipartMultipleResponsesGet200MultipartSlashRelatedResponse>::B(body)
+      },
+      e => {
+        return Err(ApiError(format!("Unexpected content type: {:?}", e)));
+      }
+  };
+
+
+                Ok(MultipartMultipleResponsesGetResponse::OK
+                    (body)
+                )
+            }
+            code => {
+                let headers = response.headers().clone();
+                let body = response.into_body()
+                       .take(100)
+                       .into_raw().await;
+                Err(ApiError(format!("Unexpected response code {}:\n{:?}\n\n{}",
+                    code,
+                    headers,
+                    match body {
+                        Ok(body) => match String::from_utf8(body) {
+                            Ok(body) => body,
+                            Err(e) => format!("<Body was not UTF8: {:?}>", e),
+                        },
+                        Err(e) => format!("<Failed to read body: {}>", e),
+                    }
+                )))
+            }
+        }
+    }
+
+    async fn multipart_optional_multiple_options_post(
+        &self,
+        param_body: Option<swagger::OneOf2<models::MultipartOptionalMultipleOptionsPostApplicationSlashJsonRequest,models::MultipartOptionalMultipleOptionsPostMultipartSlashRelatedRequest>>,
+        context: &C) -> Result<MultipartOptionalMultipleOptionsPostResponse, ApiError>
+    {
+        let mut client_service = self.client_service.clone();
+        let mut uri = format!(
+            "{}/multipart-optional-multiple-options",
+            self.base_path
+        );
+
+        // Query parameters
+        let query_string = {
+            let mut query_string = form_urlencoded::Serializer::new("".to_owned());
+            query_string.finish()
+        };
+        if !query_string.is_empty() {
+            uri += "?";
+            uri += &query_string;
+        }
+
+        let uri = match Uri::from_str(&uri) {
+            Ok(uri) => uri,
+            Err(err) => return Err(ApiError(format!("Unable to build URI: {}", err))),
+        };
+
+        let mut request = match Request::builder()
+            .method("POST")
+            .uri(uri)
+            .body(Body::empty()) {
+                Ok(req) => req,
+                Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
+        };
+
+      if let Some(param_body) = param_body {
+      match param_body {
+    swagger::OneOf2::<models::MultipartOptionalMultipleOptionsPostApplicationSlashJsonRequest, models::MultipartOptionalMultipleOptionsPostMultipartSlashRelatedRequest>::A(body) => {
+            let body : models::StringObject = body.into();
+            let param_body = body;
+
+        // Consumes basic body
+        // Body parameter
+        let body = serde_json::to_string(&param_body).expect("impossible to fail to serialize");
+        *request.body_mut() = Body::from(body);
+
+        let header = "application/json";
+        request.headers_mut().insert(CONTENT_TYPE, match HeaderValue::from_str(header) {
+            Ok(h) => h,
+            Err(e) => return Err(ApiError(format!("Unable to create header: {} - {}", header, e)))
+        });
+
+        },
+    swagger::OneOf2::<models::MultipartOptionalMultipleOptionsPostApplicationSlashJsonRequest, models::MultipartOptionalMultipleOptionsPostMultipartSlashRelatedRequest>::B(body) => {
+            let body : models::MultipartRelatedRequest = body.into();
+            let param_object_field = body.object_field;
+            let param_optional_binary_field = body.optional_binary_field;
+            let param_required_binary_field = body.required_binary_field;
+
+        // Consumes multipart/related body
+        let boundary = swagger::multipart::related::generate_boundary();
+        let mut body_parts = vec![];
+
+        if let Some(object_field) = param_object_field {
+            let part = Node::Part(Part {
+                headers: {
+                    let mut h = Headers::new();
+                    h.set(ContentType("".parse().unwrap()));
+                    h.set_raw("Content-ID", vec![b"object_field".to_vec()]);
+                    h
+                },
+                body: serde_json::to_string(&object_field)
+                    .expect("Impossible to fail to serialize")
+                    .into_bytes(),
+            });
+            body_parts.push(part);
+        }
+
+        if let Some(optional_binary_field) = param_optional_binary_field {
+            let part = Node::Part(Part {
+                headers: {
+                    let mut h = Headers::new();
+                    h.set(ContentType("".parse().unwrap()));
+                    h.set_raw("Content-ID", vec![b"optional_binary_field".to_vec()]);
+                    h
+                },
+                body: optional_binary_field.0,
+            });
+            body_parts.push(part);
+        }
+
+        {
+            let part = Node::Part(Part {
+                headers: {
+                    let mut h = Headers::new();
+                    h.set(ContentType("".parse().unwrap()));
+                    h.set_raw("Content-ID", vec![b"required_binary_field".to_vec()]);
+                    h
+                },
+                body: param_required_binary_field.0,
+            });
+            body_parts.push(part);
+        }
+
+        // Write the body into a vec.
+        // RFC 13341 Section 7.2.1 suggests that the body should begin with a
+        // CRLF prior to the first boundary. The mime_multipart library doesn't
+        // do this, so we do it instead.
+        let mut body: Vec<u8> = vec![b'\r', b'\n'];
+        write_multipart(&mut body, &boundary, &body_parts)
+            .expect("Failed to write multipart body");
+
+
+        request.headers_mut().insert(CONTENT_TYPE,
+            match HeaderValue::from_bytes(
+                &["multipart/related; boundary=".as_bytes(), &boundary].concat()
+            ) {
+                Ok(h) => h,
+                Err(e) => return Err(ApiError(format!("Unable to create multipart/related header - {}", e)))
+        });
+
+        // Add the message body to the request object.
+        *request.body_mut() = Body::from(body);
+
+        },
+      }
+      }
+
+        let header = HeaderValue::from_str(Has::<XSpanIdString>::get(context).0.as_str());
+        request.headers_mut().insert(HeaderName::from_static("x-span-id"), match header {
+            Ok(h) => h,
+            Err(e) => return Err(ApiError(format!("Unable to create X-Span ID header value: {}", e)))
+        });
+
+        let response = client_service.call((request, context.clone()))
+            .map_err(|e| ApiError(format!("No response received: {}", e))).await?;
+
+        match response.status().as_u16() {
+            200 => {
+                let (header, body) = response.into_parts();
+                Ok(
+                    MultipartOptionalMultipleOptionsPostResponse::OK
+                )
+            }
+            code => {
+                let headers = response.headers().clone();
+                let body = response.into_body()
+                       .take(100)
+                       .into_raw().await;
+                Err(ApiError(format!("Unexpected response code {}:\n{:?}\n\n{}",
+                    code,
+                    headers,
+                    match body {
+                        Ok(body) => match String::from_utf8(body) {
+                            Ok(body) => body,
+                            Err(e) => format!("<Body was not UTF8: {:?}>", e),
+                        },
+                        Err(e) => format!("<Failed to read body: {}>", e),
+                    }
+                )))
+            }
+        }
+    }
+
     async fn multipart_related_request_post(
         &self,
         param_required_binary_field: swagger::ByteArray,
@@ -422,6 +919,8 @@ impl<S, C> Api<C> for Client<S, C> where
                 Ok(req) => req,
                 Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
         };
+
+        // No schema variants
 
         // Consumes multipart/related body
         let boundary = swagger::multipart::related::generate_boundary();
@@ -477,17 +976,17 @@ impl<S, C> Api<C> for Client<S, C> where
             .expect("Failed to write multipart body");
 
 
-        let header = "multipart/related";
         request.headers_mut().insert(CONTENT_TYPE,
-        match HeaderValue::from_bytes(
-            &[header.as_bytes(), "; boundary=".as_bytes(), &boundary, "; type=\"application/json\"".as_bytes()].concat()
-        ) {
-            Ok(h) => h,
-            Err(e) => return Err(ApiError(format!("Unable to create header: {} - {}", header, e)))
+            match HeaderValue::from_bytes(
+                &["multipart/related; boundary=".as_bytes(), &boundary].concat()
+            ) {
+                Ok(h) => h,
+                Err(e) => return Err(ApiError(format!("Unable to create multipart/related header - {}", e)))
         });
 
         // Add the message body to the request object.
         *request.body_mut() = Body::from(body);
+
 
         let header = HeaderValue::from_str(Has::<XSpanIdString>::get(context).0.as_str());
         request.headers_mut().insert(HeaderName::from_static("x-span-id"), match header {
@@ -500,6 +999,7 @@ impl<S, C> Api<C> for Client<S, C> where
 
         match response.status().as_u16() {
             201 => {
+                let (header, body) = response.into_parts();
                 Ok(
                     MultipartRelatedRequestPostResponse::OK
                 )
@@ -560,6 +1060,8 @@ impl<S, C> Api<C> for Client<S, C> where
                 Ok(req) => req,
                 Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
         };
+
+        // No schema variants
 
         // Consumes multipart/form body
         let (body_string, multipart_header) = {
@@ -643,6 +1145,7 @@ impl<S, C> Api<C> for Client<S, C> where
         });
 
 
+
         let header = HeaderValue::from_str(Has::<XSpanIdString>::get(context).0.as_str());
         request.headers_mut().insert(HeaderName::from_static("x-span-id"), match header {
             Ok(h) => h,
@@ -654,8 +1157,146 @@ impl<S, C> Api<C> for Client<S, C> where
 
         match response.status().as_u16() {
             201 => {
+                let (header, body) = response.into_parts();
                 Ok(
                     MultipartRequestPostResponse::OK
+                )
+            }
+            code => {
+                let headers = response.headers().clone();
+                let body = response.into_body()
+                       .take(100)
+                       .into_raw().await;
+                Err(ApiError(format!("Unexpected response code {}:\n{:?}\n\n{}",
+                    code,
+                    headers,
+                    match body {
+                        Ok(body) => match String::from_utf8(body) {
+                            Ok(body) => body,
+                            Err(e) => format!("<Body was not UTF8: {:?}>", e),
+                        },
+                        Err(e) => format!("<Failed to read body: {}>", e),
+                    }
+                )))
+            }
+        }
+    }
+
+    async fn multipart_single_response_get(
+        &self,
+        context: &C) -> Result<MultipartSingleResponseGetResponse, ApiError>
+    {
+        let mut client_service = self.client_service.clone();
+        let mut uri = format!(
+            "{}/multipart-single-response",
+            self.base_path
+        );
+
+        // Query parameters
+        let query_string = {
+            let mut query_string = form_urlencoded::Serializer::new("".to_owned());
+            query_string.finish()
+        };
+        if !query_string.is_empty() {
+            uri += "?";
+            uri += &query_string;
+        }
+
+        let uri = match Uri::from_str(&uri) {
+            Ok(uri) => uri,
+            Err(err) => return Err(ApiError(format!("Unable to build URI: {}", err))),
+        };
+
+        let mut request = match Request::builder()
+            .method("GET")
+            .uri(uri)
+            .body(Body::empty()) {
+                Ok(req) => req,
+                Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
+        };
+
+        // No schema variants
+
+
+        let header = HeaderValue::from_str(Has::<XSpanIdString>::get(context).0.as_str());
+        request.headers_mut().insert(HeaderName::from_static("x-span-id"), match header {
+            Ok(h) => h,
+            Err(e) => return Err(ApiError(format!("Unable to create X-Span ID header value: {}", e)))
+        });
+
+        let response = client_service.call((request, context.clone()))
+            .map_err(|e| ApiError(format!("No response received: {}", e))).await?;
+
+        match response.status().as_u16() {
+            200 => {
+                let (header, body) = response.into_parts();
+                let body = body
+                        .into_raw()
+                        .map_err(|e| ApiError(format!("Failed to read response: {}", e))).await?;
+
+                // multipart/related
+// Create headers from top-level content type header.
+let multipart_headers = match swagger::multipart::related::create_multipart_headers(header.headers.get(CONTENT_TYPE)) {
+    Ok(headers) => headers,
+    Err(e) => {
+        return Err(ApiError(e));
+    }
+};
+
+// &*body expresses the body as a byteslice, &mut provides a
+// mutable reference to that byteslice.
+let nodes = match read_multipart_body(&mut&*body, &multipart_headers, false) {
+    Ok(nodes) => nodes,
+    Err(e) => {
+        return Err(ApiError(format!("Could not read multipart body for MultipartSingleResponseGet: {}", e)));
+    }
+};
+
+let mut param_object_field = None;
+let mut param_optional_binary_field = None;
+
+for node in nodes {
+    if let Node::Part(part) = node {
+        let content_type = part.content_type().map(|x| format!("{}",x));
+        match content_type.as_ref().map(|x| x.as_str()) {
+            Some("") if param_object_field.is_none() => {
+                // Extract JSON part.
+                let deserializer = &mut serde_json::Deserializer::from_slice(part.body.as_slice());
+                let json_data: String = match serde_ignored::deserialize(deserializer, |path| {
+                    warn!("Ignoring unknown field in JSON part: {}", path);
+                }) {
+                    Ok(json_data) => json_data,
+                    Err(e) => return Err(ApiError(format!("Couldn't parse body parameter String - doesn't match schema: {}", e)))
+                };
+                // Push JSON part to return object.
+                param_object_field.get_or_insert(json_data);
+            },
+            Some("") if param_optional_binary_field.is_none() => {
+                param_optional_binary_field.get_or_insert(swagger::ByteArray(part.body));
+            },
+            Some(content_type) => {
+                warn!("Ignoring unexpected content type: {}", content_type);
+            },
+            None => {
+                warn!("Missing content type");
+            },
+        }
+    } else {
+        return Err(ApiError(format!("Unexpected part in multipart body for MultipartSingleResponseGet: {:?}", node)));
+    }
+}
+
+// Check that the required multipart chunks are present.
+              let body = models::MultipartSingleResponseGet200Response {
+                  object_field: param_object_field,
+                  optional_binary_field: param_optional_binary_field,
+              };
+
+
+
+
+                Ok(MultipartSingleResponseGetResponse::OK
+                    (body)
                 )
             }
             code => {
@@ -713,6 +1354,8 @@ impl<S, C> Api<C> for Client<S, C> where
                 Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
         };
 
+        // No schema variants
+
         // Consumes multipart/related body
         let boundary = swagger::multipart::related::generate_boundary();
         let mut body_parts = vec![];
@@ -752,17 +1395,17 @@ impl<S, C> Api<C> for Client<S, C> where
             .expect("Failed to write multipart body");
 
 
-        let header = "multipart/related";
         request.headers_mut().insert(CONTENT_TYPE,
-        match HeaderValue::from_bytes(
-            &[header.as_bytes(), "; boundary=".as_bytes(), &boundary, "; type=\"application/json\"".as_bytes()].concat()
-        ) {
-            Ok(h) => h,
-            Err(e) => return Err(ApiError(format!("Unable to create header: {} - {}", header, e)))
+            match HeaderValue::from_bytes(
+                &["multipart/related; boundary=".as_bytes(), &boundary].concat()
+            ) {
+                Ok(h) => h,
+                Err(e) => return Err(ApiError(format!("Unable to create multipart/related header - {}", e)))
         });
 
         // Add the message body to the request object.
         *request.body_mut() = Body::from(body);
+
 
         let header = HeaderValue::from_str(Has::<XSpanIdString>::get(context).0.as_str());
         request.headers_mut().insert(HeaderName::from_static("x-span-id"), match header {
@@ -775,6 +1418,7 @@ impl<S, C> Api<C> for Client<S, C> where
 
         match response.status().as_u16() {
             200 => {
+                let (header, body) = response.into_parts();
                 Ok(
                     MultipleIdenticalMimeTypesPostResponse::OK
                 )

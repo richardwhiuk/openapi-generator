@@ -3,9 +3,17 @@
 Cargo.toml
 README.md
 api/openapi.yaml
+docs/MultipartMultipleOptionsPostApplicationSlashJsonRequest.md
+docs/MultipartMultipleOptionsPostMultipartSlashRelatedRequest.md
+docs/MultipartMultipleResponsesGet200ApplicationSlashJsonResponse.md
+docs/MultipartMultipleResponsesGet200MultipartSlashRelatedResponse.md
+docs/MultipartOptionalMultipleOptionsPostApplicationSlashJsonRequest.md
+docs/MultipartOptionalMultipleOptionsPostMultipartSlashRelatedRequest.md
 docs/MultipartRelatedRequest.md
 docs/MultipartRequestObjectField.md
+docs/MultipartSingleResponseGet200Response.md
 docs/MultipleIdenticalMimeTypesPostRequest.md
+docs/StringObject.md
 docs/default_api.md
 examples/ca.pem
 examples/client/client_auth.rs

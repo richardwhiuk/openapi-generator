@@ -5,8 +5,12 @@
 use futures::{future, Stream, stream};
 #[allow(unused_imports)]
 use multipart_v3::{Api, ApiNoContext, Claims, Client, ContextWrapperExt, models,
+                      MultipartMultipleOptionsPostResponse,
+                      MultipartMultipleResponsesGetResponse,
+                      MultipartOptionalMultipleOptionsPostResponse,
                       MultipartRelatedRequestPostResponse,
                       MultipartRequestPostResponse,
+                      MultipartSingleResponseGetResponse,
                       MultipleIdenticalMimeTypesPostResponse,
                      };
 use clap::{App, Arg};
@@ -36,8 +40,10 @@ fn main() {
         .arg(Arg::with_name("operation")
             .help("Sets the operation to run")
             .possible_values(&[
+                "MultipartMultipleResponsesGet",
                 "MultipartRelatedRequestPost",
                 "MultipartRequestPost",
+                "MultipartSingleResponseGet",
                 "MultipleIdenticalMimeTypesPost",
             ])
             .required(true)
@@ -107,6 +113,27 @@ fn main() {
     let mut rt = tokio::runtime::Runtime::new().unwrap();
 
     match matches.value_of("operation") {
+        /* Disabled because there's no example.
+        Some("MultipartMultipleOptionsPost") => {
+            let result = rt.block_on(client.multipart_multiple_options_post(
+                  ???
+            ));
+            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
+        },
+        */
+        Some("MultipartMultipleResponsesGet") => {
+            let result = rt.block_on(client.multipart_multiple_responses_get(
+            ));
+            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
+        },
+        /* Disabled because there's no example.
+        Some("MultipartOptionalMultipleOptionsPost") => {
+            let result = rt.block_on(client.multipart_optional_multiple_options_post(
+                  None
+            ));
+            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
+        },
+        */
         Some("MultipartRelatedRequestPost") => {
             let result = rt.block_on(client.multipart_related_request_post(
                   swagger::ByteArray(Vec::from("BINARY_DATA_HERE")),
@@ -121,6 +148,11 @@ fn main() {
                   swagger::ByteArray(Vec::from("BYTE_ARRAY_DATA_HERE")),
                   Some("optional_string_field_example".to_string()),
                   None
+            ));
+            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
+        },
+        Some("MultipartSingleResponseGet") => {
+            let result = rt.block_on(client.multipart_single_response_get(
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },

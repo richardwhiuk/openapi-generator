@@ -1,4 +1,4 @@
-#![allow(missing_docs, trivial_casts, unused_variables, unused_mut, unused_imports, unused_extern_crates, unused_attributes, non_camel_case_types)]
+#![allow(missing_docs, trivial_casts, unused_variables, unused_mut, unused_imports, unused_extern_crates, unused_attributes, non_camel_case_types, unreachable_code)]
 #![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names)]
 
 use async_trait::async_trait;
@@ -205,7 +205,7 @@ pub enum UntypedPropertyGetResponse {
 pub enum UuidGetResponse {
     /// Duplicate Response long text. One.
     DuplicateResponseLongText
-    (uuid::Uuid)
+    (models::UuidObject)
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -275,7 +275,7 @@ pub enum CreateRepoResponse {
 pub enum GetRepoInfoResponse {
     /// OK
     OK
-    (String)
+    (models::StringObject)
 }
 
 /// API

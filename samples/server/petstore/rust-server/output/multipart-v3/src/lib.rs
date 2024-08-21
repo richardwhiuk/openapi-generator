@@ -1,4 +1,4 @@
-#![allow(missing_docs, trivial_casts, unused_variables, unused_mut, unused_imports, unused_extern_crates, unused_attributes, non_camel_case_types)]
+#![allow(missing_docs, trivial_casts, unused_variables, unused_mut, unused_imports, unused_extern_crates, unused_attributes, non_camel_case_types, unreachable_code)]
 #![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names)]
 
 use async_trait::async_trait;
@@ -21,6 +21,25 @@ pub use auth::{AuthenticationApi, Claims};
 
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub enum MultipartMultipleOptionsPostResponse {
+    /// OK
+    OK
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub enum MultipartMultipleResponsesGetResponse {
+    /// OK
+    OK
+    (swagger::OneOf2<models::MultipartMultipleResponsesGet200ApplicationSlashJsonResponse,models::MultipartMultipleResponsesGet200MultipartSlashRelatedResponse>)
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub enum MultipartOptionalMultipleOptionsPostResponse {
+    /// OK
+    OK
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum MultipartRelatedRequestPostResponse {
     /// OK
     OK
@@ -30,6 +49,13 @@ pub enum MultipartRelatedRequestPostResponse {
 pub enum MultipartRequestPostResponse {
     /// OK
     OK
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub enum MultipartSingleResponseGetResponse {
+    /// OK
+    OK
+    (models::MultipartSingleResponseGet200Response)
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -46,6 +72,20 @@ pub trait Api<C: Send + Sync> {
         Poll::Ready(Ok(()))
     }
 
+    async fn multipart_multiple_options_post(
+        &self,
+        body: swagger::OneOf2<models::MultipartMultipleOptionsPostApplicationSlashJsonRequest,models::MultipartMultipleOptionsPostMultipartSlashRelatedRequest>,
+        context: &C) -> Result<MultipartMultipleOptionsPostResponse, ApiError>;
+
+    async fn multipart_multiple_responses_get(
+        &self,
+        context: &C) -> Result<MultipartMultipleResponsesGetResponse, ApiError>;
+
+    async fn multipart_optional_multiple_options_post(
+        &self,
+        body: Option<swagger::OneOf2<models::MultipartOptionalMultipleOptionsPostApplicationSlashJsonRequest,models::MultipartOptionalMultipleOptionsPostMultipartSlashRelatedRequest>>,
+        context: &C) -> Result<MultipartOptionalMultipleOptionsPostResponse, ApiError>;
+
     async fn multipart_related_request_post(
         &self,
         required_binary_field: swagger::ByteArray,
@@ -60,6 +100,10 @@ pub trait Api<C: Send + Sync> {
         optional_string_field: Option<String>,
         object_field: Option<models::MultipartRequestObjectField>,
         context: &C) -> Result<MultipartRequestPostResponse, ApiError>;
+
+    async fn multipart_single_response_get(
+        &self,
+        context: &C) -> Result<MultipartSingleResponseGetResponse, ApiError>;
 
     async fn multiple_identical_mime_types_post(
         &self,
@@ -78,6 +122,20 @@ pub trait ApiNoContext<C: Send + Sync> {
 
     fn context(&self) -> &C;
 
+    async fn multipart_multiple_options_post(
+        &self,
+        body: swagger::OneOf2<models::MultipartMultipleOptionsPostApplicationSlashJsonRequest,models::MultipartMultipleOptionsPostMultipartSlashRelatedRequest>,
+        ) -> Result<MultipartMultipleOptionsPostResponse, ApiError>;
+
+    async fn multipart_multiple_responses_get(
+        &self,
+        ) -> Result<MultipartMultipleResponsesGetResponse, ApiError>;
+
+    async fn multipart_optional_multiple_options_post(
+        &self,
+        body: Option<swagger::OneOf2<models::MultipartOptionalMultipleOptionsPostApplicationSlashJsonRequest,models::MultipartOptionalMultipleOptionsPostMultipartSlashRelatedRequest>>,
+        ) -> Result<MultipartOptionalMultipleOptionsPostResponse, ApiError>;
+
     async fn multipart_related_request_post(
         &self,
         required_binary_field: swagger::ByteArray,
@@ -92,6 +150,10 @@ pub trait ApiNoContext<C: Send + Sync> {
         optional_string_field: Option<String>,
         object_field: Option<models::MultipartRequestObjectField>,
         ) -> Result<MultipartRequestPostResponse, ApiError>;
+
+    async fn multipart_single_response_get(
+        &self,
+        ) -> Result<MultipartSingleResponseGetResponse, ApiError>;
 
     async fn multiple_identical_mime_types_post(
         &self,
@@ -124,6 +186,32 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
         ContextWrapper::context(self)
     }
 
+    async fn multipart_multiple_options_post(
+        &self,
+        body: swagger::OneOf2<models::MultipartMultipleOptionsPostApplicationSlashJsonRequest,models::MultipartMultipleOptionsPostMultipartSlashRelatedRequest>,
+        ) -> Result<MultipartMultipleOptionsPostResponse, ApiError>
+    {
+        let context = self.context().clone();
+        self.api().multipart_multiple_options_post(body, &context).await
+    }
+
+    async fn multipart_multiple_responses_get(
+        &self,
+        ) -> Result<MultipartMultipleResponsesGetResponse, ApiError>
+    {
+        let context = self.context().clone();
+        self.api().multipart_multiple_responses_get(&context).await
+    }
+
+    async fn multipart_optional_multiple_options_post(
+        &self,
+        body: Option<swagger::OneOf2<models::MultipartOptionalMultipleOptionsPostApplicationSlashJsonRequest,models::MultipartOptionalMultipleOptionsPostMultipartSlashRelatedRequest>>,
+        ) -> Result<MultipartOptionalMultipleOptionsPostResponse, ApiError>
+    {
+        let context = self.context().clone();
+        self.api().multipart_optional_multiple_options_post(body, &context).await
+    }
+
     async fn multipart_related_request_post(
         &self,
         required_binary_field: swagger::ByteArray,
@@ -145,6 +233,14 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
     {
         let context = self.context().clone();
         self.api().multipart_request_post(string_field, binary_field, optional_string_field, object_field, &context).await
+    }
+
+    async fn multipart_single_response_get(
+        &self,
+        ) -> Result<MultipartSingleResponseGetResponse, ApiError>
+    {
+        let context = self.context().clone();
+        self.api().multipart_single_response_get(&context).await
     }
 
     async fn multiple_identical_mime_types_post(

@@ -102,8 +102,12 @@ use crate::server_auth;
 
 use multipart_v3::{
     Api,
+    MultipartMultipleOptionsPostResponse,
+    MultipartMultipleResponsesGetResponse,
+    MultipartOptionalMultipleOptionsPostResponse,
     MultipartRelatedRequestPostResponse,
     MultipartRequestPostResponse,
+    MultipartSingleResponseGetResponse,
     MultipleIdenticalMimeTypesPostResponse,
 };
 use multipart_v3::server::MakeService;
@@ -113,6 +117,32 @@ use swagger::ApiError;
 #[async_trait]
 impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
 {
+    async fn multipart_multiple_options_post(
+        &self,
+        body: swagger::OneOf2<models::MultipartMultipleOptionsPostApplicationSlashJsonRequest,models::MultipartMultipleOptionsPostMultipartSlashRelatedRequest>,
+        context: &C) -> Result<MultipartMultipleOptionsPostResponse, ApiError>
+    {
+        info!("multipart_multiple_options_post({:?}) - X-Span-ID: {:?}", body, context.get().0.clone());
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
+    }
+
+    async fn multipart_multiple_responses_get(
+        &self,
+        context: &C) -> Result<MultipartMultipleResponsesGetResponse, ApiError>
+    {
+        info!("multipart_multiple_responses_get() - X-Span-ID: {:?}", context.get().0.clone());
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
+    }
+
+    async fn multipart_optional_multiple_options_post(
+        &self,
+        body: Option<swagger::OneOf2<models::MultipartOptionalMultipleOptionsPostApplicationSlashJsonRequest,models::MultipartOptionalMultipleOptionsPostMultipartSlashRelatedRequest>>,
+        context: &C) -> Result<MultipartOptionalMultipleOptionsPostResponse, ApiError>
+    {
+        info!("multipart_optional_multiple_options_post({:?}) - X-Span-ID: {:?}", body, context.get().0.clone());
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
+    }
+
     async fn multipart_related_request_post(
         &self,
         required_binary_field: swagger::ByteArray,
@@ -133,6 +163,14 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         context: &C) -> Result<MultipartRequestPostResponse, ApiError>
     {
         info!("multipart_request_post(\"{}\", {:?}, {:?}, {:?}) - X-Span-ID: {:?}", string_field, binary_field, optional_string_field, object_field, context.get().0.clone());
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
+    }
+
+    async fn multipart_single_response_get(
+        &self,
+        context: &C) -> Result<MultipartSingleResponseGetResponse, ApiError>
+    {
+        info!("multipart_single_response_get() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError("Api-Error: Operation is NOT implemented".into()))
     }
 

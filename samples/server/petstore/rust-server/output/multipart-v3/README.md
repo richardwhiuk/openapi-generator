@@ -61,8 +61,10 @@ cargo run --example server
 To run a client, follow one of the following simple steps:
 
 ```
+cargo run --example client MultipartMultipleResponsesGet
 cargo run --example client MultipartRelatedRequestPost
 cargo run --example client MultipartRequestPost
+cargo run --example client MultipartSingleResponseGet
 cargo run --example client MultipleIdenticalMimeTypesPost
 ```
 
@@ -97,16 +99,28 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[****](docs/default_api.md#) | **POST** /multipart-multiple-options | 
+[****](docs/default_api.md#) | **GET** /multipart-multiple-responses | 
+[****](docs/default_api.md#) | **POST** /multipart-optional-multiple-options | 
 [****](docs/default_api.md#) | **POST** /multipart_related_request | 
 [****](docs/default_api.md#) | **POST** /multipart_request | 
+[****](docs/default_api.md#) | **GET** /multipart-single-response | 
 [****](docs/default_api.md#) | **POST** /multiple-identical-mime-types | 
 
 
 ## Documentation For Models
 
+ - [MultipartMultipleOptionsPostApplicationSlashJsonRequest](docs/MultipartMultipleOptionsPostApplicationSlashJsonRequest.md)
+ - [MultipartMultipleOptionsPostMultipartSlashRelatedRequest](docs/MultipartMultipleOptionsPostMultipartSlashRelatedRequest.md)
+ - [MultipartMultipleResponsesGet200ApplicationSlashJsonResponse](docs/MultipartMultipleResponsesGet200ApplicationSlashJsonResponse.md)
+ - [MultipartMultipleResponsesGet200MultipartSlashRelatedResponse](docs/MultipartMultipleResponsesGet200MultipartSlashRelatedResponse.md)
+ - [MultipartOptionalMultipleOptionsPostApplicationSlashJsonRequest](docs/MultipartOptionalMultipleOptionsPostApplicationSlashJsonRequest.md)
+ - [MultipartOptionalMultipleOptionsPostMultipartSlashRelatedRequest](docs/MultipartOptionalMultipleOptionsPostMultipartSlashRelatedRequest.md)
  - [MultipartRelatedRequest](docs/MultipartRelatedRequest.md)
  - [MultipartRequestObjectField](docs/MultipartRequestObjectField.md)
+ - [MultipartSingleResponseGet200Response](docs/MultipartSingleResponseGet200Response.md)
  - [MultipleIdenticalMimeTypesPostRequest](docs/MultipleIdenticalMimeTypesPostRequest.md)
+ - [StringObject](docs/StringObject.md)
 
 
 ## Documentation For Authorization

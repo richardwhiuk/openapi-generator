@@ -68,8 +68,129 @@ paths:
       responses:
         "200":
           description: OK
+  /multipart-multiple-options:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/string_object'
+          multipart/related:
+            encoding:
+              object_field:
+                contentType: application/json
+                style: form
+              optional_binary_field:
+                contentType: application/zip
+                headers:
+                  Content-Id:
+                    explode: false
+                    schema:
+                      type: string
+                    style: simple
+                style: form
+              required_binary_field:
+                contentType: image/png
+                headers:
+                  Content-Id:
+                    explode: false
+                    schema:
+                      type: string
+                    style: simple
+                style: form
+            schema:
+              $ref: '#/components/schemas/multipart_related_request'
+        required: true
+      responses:
+        "200":
+          description: OK
+  /multipart-optional-multiple-options:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/string_object'
+          multipart/related:
+            encoding:
+              object_field:
+                contentType: application/json
+                style: form
+              optional_binary_field:
+                contentType: application/zip
+                headers:
+                  Content-Id:
+                    explode: false
+                    schema:
+                      type: string
+                    style: simple
+                style: form
+              required_binary_field:
+                contentType: image/png
+                headers:
+                  Content-Id:
+                    explode: false
+                    schema:
+                      type: string
+                    style: simple
+                style: form
+            schema:
+              $ref: '#/components/schemas/multipart_related_request'
+        required: false
+      responses:
+        "200":
+          description: OK
+  /multipart-single-response:
+    get:
+      responses:
+        "200":
+          content:
+            multipart/related:
+              encoding:
+                object_field:
+                  contentType: application/json
+                  style: form
+                optional_binary_field:
+                  contentType: application/zip
+                  headers:
+                    Content-Id:
+                      explode: false
+                      schema:
+                        type: string
+                      style: simple
+                  style: form
+              schema:
+                $ref: '#/components/schemas/_multipart_single_response_get_200_response'
+          description: OK
+  /multipart-multiple-responses:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/string_object'
+            multipart/related:
+              encoding:
+                object_field:
+                  contentType: application/json
+                  style: form
+                optional_binary_field:
+                  contentType: application/zip
+                  headers:
+                    Content-Id:
+                      explode: false
+                      schema:
+                        type: string
+                      style: simple
+                  style: form
+              schema:
+                $ref: '#/components/schemas/_multipart_single_response_get_200_response'
+          description: OK
 components:
   schemas:
+    string_object:
+      type: string
     multipart_request:
       properties:
         string_field:
@@ -104,6 +225,14 @@ components:
           format: binary
           type: string
         binary2:
+          format: binary
+          type: string
+      type: object
+    _multipart_single_response_get_200_response:
+      properties:
+        object_field:
+          type: string
+        optional_binary_field:
           format: binary
           type: string
       type: object
