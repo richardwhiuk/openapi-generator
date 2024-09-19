@@ -138,7 +138,19 @@ pub enum RegisterCallbackPostResponse {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub enum RequiredOctetStreamPutResponse {
+pub enum RequiredOctetStreamBinaryPostResponse {
+    /// OK
+    OK
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub enum RequiredOctetStreamBinaryPutResponse {
+    /// OK
+    OK
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub enum RequiredOctetStreamBytePutResponse {
     /// OK
     OK
 }
@@ -349,10 +361,20 @@ pub trait Api<C: Send + Sync> {
         url: String,
         context: &C) -> Result<RegisterCallbackPostResponse, ApiError>;
 
-    async fn required_octet_stream_put(
+    async fn required_octet_stream_binary_post(
         &self,
         body: swagger::ByteArray,
-        context: &C) -> Result<RequiredOctetStreamPutResponse, ApiError>;
+        context: &C) -> Result<RequiredOctetStreamBinaryPostResponse, ApiError>;
+
+    async fn required_octet_stream_binary_put(
+        &self,
+        body: swagger::ByteArray,
+        context: &C) -> Result<RequiredOctetStreamBinaryPutResponse, ApiError>;
+
+    async fn required_octet_stream_byte_put(
+        &self,
+        body: swagger::ByteArray,
+        context: &C) -> Result<RequiredOctetStreamBytePutResponse, ApiError>;
 
     async fn responses_with_headers_get(
         &self,
@@ -486,10 +508,20 @@ pub trait ApiNoContext<C: Send + Sync> {
         url: String,
         ) -> Result<RegisterCallbackPostResponse, ApiError>;
 
-    async fn required_octet_stream_put(
+    async fn required_octet_stream_binary_post(
         &self,
         body: swagger::ByteArray,
-        ) -> Result<RequiredOctetStreamPutResponse, ApiError>;
+        ) -> Result<RequiredOctetStreamBinaryPostResponse, ApiError>;
+
+    async fn required_octet_stream_binary_put(
+        &self,
+        body: swagger::ByteArray,
+        ) -> Result<RequiredOctetStreamBinaryPutResponse, ApiError>;
+
+    async fn required_octet_stream_byte_put(
+        &self,
+        body: swagger::ByteArray,
+        ) -> Result<RequiredOctetStreamBytePutResponse, ApiError>;
 
     async fn responses_with_headers_get(
         &self,
@@ -689,13 +721,31 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
         self.api().register_callback_post(url, &context).await
     }
 
-    async fn required_octet_stream_put(
+    async fn required_octet_stream_binary_post(
         &self,
         body: swagger::ByteArray,
-        ) -> Result<RequiredOctetStreamPutResponse, ApiError>
+        ) -> Result<RequiredOctetStreamBinaryPostResponse, ApiError>
     {
         let context = self.context().clone();
-        self.api().required_octet_stream_put(body, &context).await
+        self.api().required_octet_stream_binary_post(body, &context).await
+    }
+
+    async fn required_octet_stream_binary_put(
+        &self,
+        body: swagger::ByteArray,
+        ) -> Result<RequiredOctetStreamBinaryPutResponse, ApiError>
+    {
+        let context = self.context().clone();
+        self.api().required_octet_stream_binary_put(body, &context).await
+    }
+
+    async fn required_octet_stream_byte_put(
+        &self,
+        body: swagger::ByteArray,
+        ) -> Result<RequiredOctetStreamBytePutResponse, ApiError>
+    {
+        let context = self.context().clone();
+        self.api().required_octet_stream_byte_put(body, &context).await
     }
 
     async fn responses_with_headers_get(

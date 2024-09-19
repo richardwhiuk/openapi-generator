@@ -115,7 +115,9 @@ use openapi_v3::{
     ParamgetGetResponse,
     ReadonlyAuthSchemeGetResponse,
     RegisterCallbackPostResponse,
-    RequiredOctetStreamPutResponse,
+    RequiredOctetStreamBinaryPostResponse,
+    RequiredOctetStreamBinaryPutResponse,
+    RequiredOctetStreamBytePutResponse,
     ResponsesWithHeadersGetResponse,
     Rfc7807GetResponse,
     UntypedPropertyGetResponse,
@@ -251,12 +253,30 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         Err(ApiError("Api-Error: Operation is NOT implemented".into()))
     }
 
-    async fn required_octet_stream_put(
+    async fn required_octet_stream_binary_post(
         &self,
         body: swagger::ByteArray,
-        context: &C) -> Result<RequiredOctetStreamPutResponse, ApiError>
+        context: &C) -> Result<RequiredOctetStreamBinaryPostResponse, ApiError>
     {
-        info!("required_octet_stream_put({:?}) - X-Span-ID: {:?}", body, context.get().0.clone());
+        info!("required_octet_stream_binary_post({:?}) - X-Span-ID: {:?}", body, context.get().0.clone());
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
+    }
+
+    async fn required_octet_stream_binary_put(
+        &self,
+        body: swagger::ByteArray,
+        context: &C) -> Result<RequiredOctetStreamBinaryPutResponse, ApiError>
+    {
+        info!("required_octet_stream_binary_put({:?}) - X-Span-ID: {:?}", body, context.get().0.clone());
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
+    }
+
+    async fn required_octet_stream_byte_put(
+        &self,
+        body: swagger::ByteArray,
+        context: &C) -> Result<RequiredOctetStreamBytePutResponse, ApiError>
+    {
+        info!("required_octet_stream_byte_put({:?}) - X-Span-ID: {:?}", body, context.get().0.clone());
         Err(ApiError("Api-Error: Operation is NOT implemented".into()))
     }
 

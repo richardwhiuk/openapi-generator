@@ -74,7 +74,8 @@ cargo run --example client OverrideServerGet
 cargo run --example client ParamgetGet
 cargo run --example client ReadonlyAuthSchemeGet
 cargo run --example client RegisterCallbackPost
-cargo run --example client RequiredOctetStreamPut
+cargo run --example client RequiredOctetStreamBinaryPut
+cargo run --example client RequiredOctetStreamBytePut
 cargo run --example client ResponsesWithHeadersGet
 cargo run --example client Rfc7807Get
 cargo run --example client UntypedPropertyGet
@@ -132,7 +133,9 @@ Method | HTTP request | Description
 [****](docs/default_api.md#) | **GET** /paramget | Get some stuff with parameters.
 [****](docs/default_api.md#) | **GET** /readonly_auth_scheme | 
 [****](docs/default_api.md#) | **POST** /register-callback | 
-[****](docs/default_api.md#) | **PUT** /required_octet_stream | 
+[****](docs/default_api.md#) | **POST** /required_octet_stream_binary | 
+[****](docs/default_api.md#) | **PUT** /required_octet_stream_binary | 
+[****](docs/default_api.md#) | **PUT** /required_octet_stream_byte | 
 [****](docs/default_api.md#) | **GET** /responses_with_headers | 
 [****](docs/default_api.md#) | **GET** /rfc7807 | 
 [****](docs/default_api.md#) | **GET** /untyped_property | 

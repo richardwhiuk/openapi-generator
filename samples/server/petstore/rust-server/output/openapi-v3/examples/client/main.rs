@@ -19,7 +19,9 @@ use openapi_v3::{Api, ApiNoContext, Claims, Client, ContextWrapperExt, models,
                       ParamgetGetResponse,
                       ReadonlyAuthSchemeGetResponse,
                       RegisterCallbackPostResponse,
-                      RequiredOctetStreamPutResponse,
+                      RequiredOctetStreamBinaryPostResponse,
+                      RequiredOctetStreamBinaryPutResponse,
+                      RequiredOctetStreamBytePutResponse,
                       ResponsesWithHeadersGetResponse,
                       Rfc7807GetResponse,
                       UntypedPropertyGetResponse,
@@ -73,7 +75,8 @@ fn main() {
                 "ParamgetGet",
                 "ReadonlyAuthSchemeGet",
                 "RegisterCallbackPost",
-                "RequiredOctetStreamPut",
+                "RequiredOctetStreamBinaryPut",
+                "RequiredOctetStreamBytePut",
                 "ResponsesWithHeadersGet",
                 "Rfc7807Get",
                 "UntypedPropertyGet",
@@ -233,8 +236,22 @@ fn main() {
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
-        Some("RequiredOctetStreamPut") => {
-            let result = rt.block_on(client.required_octet_stream_put(
+        /* Disabled because there's no example.
+        Some("RequiredOctetStreamBinaryPost") => {
+            let result = rt.block_on(client.required_octet_stream_binary_post(
+                  ???
+            ));
+            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
+        },
+        */
+        Some("RequiredOctetStreamBinaryPut") => {
+            let result = rt.block_on(client.required_octet_stream_binary_put(
+                  swagger::ByteArray(Vec::from("BINARY_DATA_HERE"))
+            ));
+            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
+        },
+        Some("RequiredOctetStreamBytePut") => {
+            let result = rt.block_on(client.required_octet_stream_byte_put(
                   swagger::ByteArray(Vec::from("BYTE_ARRAY_DATA_HERE"))
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());

@@ -161,7 +161,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/UuidObject'
           description: Duplicate Response long text. One.
-  /required_octet_stream:
+  /required_octet_stream_binary:
+    post:
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: object
+        required: true
+      responses:
+        "200":
+          description: OK
+    put:
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              format: binary
+              type: string
+        required: true
+      responses:
+        "200":
+          description: OK
+  /required_octet_stream_byte:
     put:
       requestBody:
         content:

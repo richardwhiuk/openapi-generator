@@ -34,7 +34,9 @@ use crate::{Api,
      ParamgetGetResponse,
      ReadonlyAuthSchemeGetResponse,
      RegisterCallbackPostResponse,
-     RequiredOctetStreamPutResponse,
+     RequiredOctetStreamBinaryPostResponse,
+     RequiredOctetStreamBinaryPutResponse,
+     RequiredOctetStreamBytePutResponse,
      ResponsesWithHeadersGetResponse,
      Rfc7807GetResponse,
      UntypedPropertyGetResponse,
@@ -74,7 +76,8 @@ mod paths {
             r"^/register-callback$",
             r"^/repos$",
             r"^/repos/(?P<repoId>[^/?#]*)$",
-            r"^/required_octet_stream$",
+            r"^/required_octet_stream_binary$",
+            r"^/required_octet_stream_byte$",
             r"^/responses_with_headers$",
             r"^/rfc7807$",
             r"^/untyped_property$",
@@ -113,14 +116,15 @@ mod paths {
             regex::Regex::new(r"^/repos/(?P<repoId>[^/?#]*)$")
                 .expect("Unable to create regex for REPOS_REPOID");
     }
-    pub(crate) static ID_REQUIRED_OCTET_STREAM: usize = 16;
-    pub(crate) static ID_RESPONSES_WITH_HEADERS: usize = 17;
-    pub(crate) static ID_RFC7807: usize = 18;
-    pub(crate) static ID_UNTYPED_PROPERTY: usize = 19;
-    pub(crate) static ID_UUID: usize = 20;
-    pub(crate) static ID_XML: usize = 21;
-    pub(crate) static ID_XML_EXTRA: usize = 22;
-    pub(crate) static ID_XML_OTHER: usize = 23;
+    pub(crate) static ID_REQUIRED_OCTET_STREAM_BINARY: usize = 16;
+    pub(crate) static ID_REQUIRED_OCTET_STREAM_BYTE: usize = 17;
+    pub(crate) static ID_RESPONSES_WITH_HEADERS: usize = 18;
+    pub(crate) static ID_RFC7807: usize = 19;
+    pub(crate) static ID_UNTYPED_PROPERTY: usize = 20;
+    pub(crate) static ID_UUID: usize = 21;
+    pub(crate) static ID_XML: usize = 22;
+    pub(crate) static ID_XML_EXTRA: usize = 23;
+    pub(crate) static ID_XML_OTHER: usize = 24;
 }
 
 
@@ -1039,8 +1043,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                         Ok(response)
             },
 
-            // RequiredOctetStreamPut - PUT /required_octet_stream
-            hyper::Method::PUT if path.matched(paths::ID_REQUIRED_OCTET_STREAM) => {
+            // RequiredOctetStreamBinaryPost - POST /required_octet_stream_binary
+            hyper::Method::POST if path.matched(paths::ID_REQUIRED_OCTET_STREAM_BINARY) => {
                 // Handle body parameters (note that non-required body parameters will ignore garbage
                 // values, rather than causing a 400 response). Produce warning header and logs for
                 // any unused fields.
@@ -1062,7 +1066,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                 };
 
 
-                                let result = api_impl.required_octet_stream_put(
+                                let result = api_impl.required_octet_stream_binary_post(
                                             param_body,
                                         &context
                                     ).await;
@@ -1080,7 +1084,149 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                         }
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                RequiredOctetStreamPutResponse::OK
+                                                RequiredOctetStreamBinaryPostResponse::OK
+                                                => {
+                                                    *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
+
+
+                                                },
+                                            },
+                                            Err(_) => {
+                                                // Application code returned an error. This should not happen, as the implementation should
+                                                // return a valid response.
+                                                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                                                *response.body_mut() = Body::from("An internal error occurred");
+                                            },
+                                        }
+
+                                        Ok(response)
+                            },
+                            Err(e) => Ok(Response::builder()
+                                                .status(StatusCode::BAD_REQUEST)
+                                                .body(Body::from(format!("Unable to read body: {}", e)))
+                                                .expect("Unable to create Bad Request response due to unable to read body")),
+                        }
+            },
+
+            // RequiredOctetStreamBinaryPut - PUT /required_octet_stream_binary
+            hyper::Method::PUT if path.matched(paths::ID_REQUIRED_OCTET_STREAM_BINARY) => {
+                // Handle body parameters (note that non-required body parameters will ignore garbage
+                // values, rather than causing a 400 response). Produce warning header and logs for
+                // any unused fields.
+                let result = body.into_raw().await;
+                match result {
+                     Ok(body) => {
+                                let mut unused_elements : Vec<String> = vec![];
+                                let param_body: Option<swagger::ByteArray> = if !body.is_empty() {
+                                    Some(swagger::ByteArray(body.to_vec()))
+                                } else {
+                                    None
+                                };
+                                let param_body = match param_body {
+                                    Some(param_body) => param_body,
+                                    None => return Ok(Response::builder()
+                                                        .status(StatusCode::BAD_REQUEST)
+                                                        .body(Body::from("Missing required body parameter body"))
+                                                        .expect("Unable to create Bad Request response for missing body parameter body")),
+                                };
+
+
+                                let result = api_impl.required_octet_stream_binary_put(
+                                            param_body,
+                                        &context
+                                    ).await;
+                                let mut response = Response::new(Body::empty());
+                                response.headers_mut().insert(
+                                            HeaderName::from_static("x-span-id"),
+                                            HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
+                                                .expect("Unable to create X-Span-ID header value"));
+
+                                        if !unused_elements.is_empty() {
+                                            response.headers_mut().insert(
+                                                HeaderName::from_static("warning"),
+                                                HeaderValue::from_str(format!("Ignoring unknown fields in body: {:?}", unused_elements).as_str())
+                                                    .expect("Unable to create Warning header value"));
+                                        }
+                                        match result {
+                                            Ok(rsp) => match rsp {
+                                                RequiredOctetStreamBinaryPutResponse::OK
+                                                => {
+                                                    *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
+
+
+                                                },
+                                            },
+                                            Err(_) => {
+                                                // Application code returned an error. This should not happen, as the implementation should
+                                                // return a valid response.
+                                                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                                                *response.body_mut() = Body::from("An internal error occurred");
+                                            },
+                                        }
+
+                                        Ok(response)
+                            },
+                            Err(e) => Ok(Response::builder()
+                                                .status(StatusCode::BAD_REQUEST)
+                                                .body(Body::from(format!("Unable to read body: {}", e)))
+                                                .expect("Unable to create Bad Request response due to unable to read body")),
+                        }
+            },
+
+            // RequiredOctetStreamBytePut - PUT /required_octet_stream_byte
+            hyper::Method::PUT if path.matched(paths::ID_REQUIRED_OCTET_STREAM_BYTE) => {
+                // Handle body parameters (note that non-required body parameters will ignore garbage
+                // values, rather than causing a 400 response). Produce warning header and logs for
+                // any unused fields.
+                let result = body.into_raw().await;
+                match result {
+                     Ok(body) => {
+                                let mut unused_elements : Vec<String> = vec![];
+                                let param_body: Option<swagger::ByteArray> = if !body.is_empty() {
+                                    match String::from_utf8(body.to_vec()) {
+                                        Ok(param_body) => match param_body.parse::<swagger::ByteArray>() {
+                                            Ok(param_body) => Some(param_body),
+                                            Err(e) => return Ok(Response::builder()
+                                                        .status(StatusCode::BAD_REQUEST)
+                                                        .body(Body::from(format!("Couldn't decode body parameter body: {}", e)))
+                                                        .expect("Unable to create Bad Request response for invalid body parameter body due to decode error")),
+                                        },
+                                        Err(e) => return Ok(Response::builder()
+                                                        .status(StatusCode::BAD_REQUEST)
+                                                        .body(Body::from(format!("Couldn't parse body parameter body - not valid UTF-8: {}", e)))
+                                                        .expect("Unable to create Bad Request response for invalid body parameter body due to UTF-8")),
+                                    }
+                                } else {
+                                    None
+                                };
+                                let param_body = match param_body {
+                                    Some(param_body) => param_body,
+                                    None => return Ok(Response::builder()
+                                                        .status(StatusCode::BAD_REQUEST)
+                                                        .body(Body::from("Missing required body parameter body"))
+                                                        .expect("Unable to create Bad Request response for missing body parameter body")),
+                                };
+
+
+                                let result = api_impl.required_octet_stream_byte_put(
+                                            param_body,
+                                        &context
+                                    ).await;
+                                let mut response = Response::new(Body::empty());
+                                response.headers_mut().insert(
+                                            HeaderName::from_static("x-span-id"),
+                                            HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
+                                                .expect("Unable to create X-Span-ID header value"));
+
+                                        if !unused_elements.is_empty() {
+                                            response.headers_mut().insert(
+                                                HeaderName::from_static("warning"),
+                                                HeaderValue::from_str(format!("Ignoring unknown fields in body: {:?}", unused_elements).as_str())
+                                                    .expect("Unable to create Warning header value"));
+                                        }
+                                        match result {
+                                            Ok(rsp) => match rsp {
+                                                RequiredOctetStreamBytePutResponse::OK
                                                 => {
                                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
 
@@ -1995,7 +2141,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
             _ if path.matched(paths::ID_REGISTER_CALLBACK) => method_not_allowed(),
             _ if path.matched(paths::ID_REPOS) => method_not_allowed(),
             _ if path.matched(paths::ID_REPOS_REPOID) => method_not_allowed(),
-            _ if path.matched(paths::ID_REQUIRED_OCTET_STREAM) => method_not_allowed(),
+            _ if path.matched(paths::ID_REQUIRED_OCTET_STREAM_BINARY) => method_not_allowed(),
+            _ if path.matched(paths::ID_REQUIRED_OCTET_STREAM_BYTE) => method_not_allowed(),
             _ if path.matched(paths::ID_RESPONSES_WITH_HEADERS) => method_not_allowed(),
             _ if path.matched(paths::ID_RFC7807) => method_not_allowed(),
             _ if path.matched(paths::ID_UNTYPED_PROPERTY) => method_not_allowed(),
@@ -2047,8 +2194,12 @@ impl<T> RequestParser<T> for ApiRequestParser {
             hyper::Method::GET if path.matched(paths::ID_READONLY_AUTH_SCHEME) => Some("ReadonlyAuthSchemeGet"),
             // RegisterCallbackPost - POST /register-callback
             hyper::Method::POST if path.matched(paths::ID_REGISTER_CALLBACK) => Some("RegisterCallbackPost"),
-            // RequiredOctetStreamPut - PUT /required_octet_stream
-            hyper::Method::PUT if path.matched(paths::ID_REQUIRED_OCTET_STREAM) => Some("RequiredOctetStreamPut"),
+            // RequiredOctetStreamBinaryPost - POST /required_octet_stream_binary
+            hyper::Method::POST if path.matched(paths::ID_REQUIRED_OCTET_STREAM_BINARY) => Some("RequiredOctetStreamBinaryPost"),
+            // RequiredOctetStreamBinaryPut - PUT /required_octet_stream_binary
+            hyper::Method::PUT if path.matched(paths::ID_REQUIRED_OCTET_STREAM_BINARY) => Some("RequiredOctetStreamBinaryPut"),
+            // RequiredOctetStreamBytePut - PUT /required_octet_stream_byte
+            hyper::Method::PUT if path.matched(paths::ID_REQUIRED_OCTET_STREAM_BYTE) => Some("RequiredOctetStreamBytePut"),
             // ResponsesWithHeadersGet - GET /responses_with_headers
             hyper::Method::GET if path.matched(paths::ID_RESPONSES_WITH_HEADERS) => Some("ResponsesWithHeadersGet"),
             // Rfc7807Get - GET /rfc7807

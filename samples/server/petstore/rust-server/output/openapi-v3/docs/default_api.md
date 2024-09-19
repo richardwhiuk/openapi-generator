@@ -17,7 +17,9 @@ Method | HTTP request | Description
 ****](default_api.md#) | **GET** /paramget | Get some stuff with parameters.
 ****](default_api.md#) | **GET** /readonly_auth_scheme | 
 ****](default_api.md#) | **POST** /register-callback | 
-****](default_api.md#) | **PUT** /required_octet_stream | 
+****](default_api.md#) | **POST** /required_octet_stream_binary | 
+****](default_api.md#) | **PUT** /required_octet_stream_binary | 
+****](default_api.md#) | **PUT** /required_octet_stream_byte | 
 ****](default_api.md#) | **GET** /responses_with_headers | 
 ****](default_api.md#) | **GET** /rfc7807 | 
 ****](default_api.md#) | **GET** /untyped_property | 
@@ -363,6 +365,56 @@ No authorization required
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# ****
+> (body)
+
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+  **body** | **swagger::ByteArray**|  | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/octet-stream
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# ****
+> (body)
+
+
+### Required Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+  **body** | **swagger::ByteArray**|  | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/octet-stream
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
